@@ -1,0 +1,238 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Shot Coach Research</title>
+<style>
+:root{--bg:#0a0a0c;--panel:#131316;--line:#26262c;--text:#ececef;--dim:#8f8f99;--orange:#ff6b1a;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+padding-block:calc(20px + env(safe-area-inset-top,0px)) calc(32px + env(safe-area-inset-bottom,0px));
+padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:900px;margin:0 auto}
+h1{font-size:clamp(26px,6vw,36px);line-height:1.1;letter-spacing:-.02em;text-wrap:balance}
+h2{margin-top:2em;font-size:20px} p,li{max-width:68ch} a{color:var(--text);word-break:break-word}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;font-size:13.5px;min-width:720px}
+th,td{text-align:left;vertical-align:top;padding:9px 10px;border-top:1px solid var(--line)}
+th{font:500 11px/1.3 "SF Mono",ui-monospace,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);border-top:0;background:var(--panel)}
+.back{font:12px "SF Mono",ui-monospace,Menlo,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);text-decoration:none}
+</style></head><body><main><a class="back" href="./">← Back to the coach</a>
+<h1>Live Shot Coach: what it grades and why</h1>
+<p>This is the research behind the Live Shot Coach demo, written so it can be ported into CourtVision later. It covers every check the app runs, the camera angles each one works from, the target numbers, and where those numbers come from.</p>
+<p><strong>How to read the "Basis" column</strong>
+- <strong>Research</strong>: the number comes from a published study.
+- <strong>Coaching</strong>: the cue comes from established coaching material; the cut-off number is ours.
+- <strong>Starting point</strong>: a first guess for this demo. Tune it after real testing.</p>
+<h2>What a phone camera can and can't see</h2>
+<p>The app tracks 33 body points (MediaPipe Pose) on every frame. It sees joints, not the ball. So it can grade body mechanics, but not arc, spin, entry angle (Noah's 45/11/0), or whether the shot went in. Each angle sees different things:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Camera spot</th>
+<th>Sees well</th>
+<th>Can't judge well</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>In front / behind</td>
+<td>Elbow alignment, ball position side to side, shot line, guide hand, feet width, drifting sideways, set point height</td>
+<td>Ball behind the head, release angle, fading back</td>
+</tr>
+<tr>
+<td>Right / left side</td>
+<td>Knee bend, set point height, ball behind the head, release angle, wrist snap, fading back, leaning</td>
+<td>Elbow flare, shot line, drifting sideways</td>
+</tr>
+</tbody>
+</table></div>
+<p>Side view from the shooting-hand side is the most reliable for arm readings (right side for righties). From the other side the shooting arm is partly hidden behind the body.</p>
+<h2>The checks</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Angles</th>
+<th>What's measured</th>
+<th>Good</th>
+<th>Flagged</th>
+<th>Basis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Legs (knee bend)</td>
+<td>All</td>
+<td>Smallest knee angle in the dip (180° = straight)</td>
+<td>95–135°</td>
+<td>Over 145° (too straight) or under 85° (too deep)</td>
+<td>Research: proficient shooters dip to about 104–115° (Cabarkapa 2021, 2023)</td>
+</tr>
+<tr>
+<td>Set height</td>
+<td>All</td>
+<td>Shooting wrist height at launch, vs the ears, in shoulder-to-ear units</td>
+<td>Around eyes to forehead</td>
+<td>Wrist above the top of the head (ball on the head), or below the chin</td>
+<td>Coaching: Ben's breakdown v3 Fix #1; Wissel. Cut-offs are a starting point</td>
+</tr>
+<tr>
+<td>Ball in front</td>
+<td>Side</td>
+<td>Wrist position vs the ear at launch</td>
+<td>In front of or level with the ear</td>
+<td>More than ~0.3 units behind the ear</td>
+<td>Coaching: Wissel (beginners shoot "from behind the head"); Engelland moved Kawhi Leonard's release point from above his head to in front of his face (Grantland). Cut-off is a starting point</td>
+</tr>
+<tr>
+<td>Shooting pocket</td>
+<td>Front/back</td>
+<td>Wrist position sideways vs the middle of the body</td>
+<td>Between the shooting eye and shooting shoulder</td>
+<td>At or past the middle of the head, or far outside the shoulder</td>
+<td>Coaching: jr.nba.com, Wissel; Ben's breakdown (ball centered on the head). Starting point</td>
+</tr>
+<tr>
+<td>Elbow</td>
+<td>Front/back</td>
+<td>Forearm tilt from vertical, elbow outside the wrist</td>
+<td>Under 12°</td>
+<td>Over 22°</td>
+<td>Research: keeping the forearm closest to vertical was the key variable separating makes from misses (Cabarkapa 2021). Cut-offs are a starting point</td>
+</tr>
+<tr>
+<td>Shot line</td>
+<td>Front/back</td>
+<td>Wrist vs shooting shoulder at release</td>
+<td>Within 0.45 half-shoulder widths</td>
+<td>Over 0.7 (crossing the face or swinging out)</td>
+<td>Coaching: jr.nba.com ("arm moves straight up and down"). Starting point. Related research: shot-to-shot consistency predicts left-right accuracy (Slegers &amp; Love 2022), and shot-plane alignment predicted free-throw precision (ISBS 2023)</td>
+</tr>
+<tr>
+<td>Rhythm (jump shot)</td>
+<td>All</td>
+<td>Release time vs the top of the jump</td>
+<td>Up to 0.12 s after the peak</td>
+<td>More than 0.2 s after (shooting on the way down)</td>
+<td>Research: release around the peak (Satern 1993); elite shooters release 0–0.12 s after the peak on short and mid shots (Podmenik 2021)</td>
+</tr>
+<tr>
+<td>Rhythm (set shot)</td>
+<td>All</td>
+<td>Time between legs straightening and the arm firing</td>
+<td>Under 0.22 s</td>
+<td>Over 0.35 s (legs, then arm)</td>
+<td>Coaching: Ben's breakdown v3 Fix #4; Breakthrough ("extend the legs as you release"). Starting point</td>
+</tr>
+<tr>
+<td>Guide hand</td>
+<td>All (best front/back)</td>
+<td>Off hand moving toward the shooting side, or pushing forward with a straight arm, through release</td>
+<td>Stays still</td>
+<td>Moves more than 0.45 half-shoulder widths</td>
+<td>Coaching: Breakthrough ("no force or spin"), jr.nba.com. Starting point</td>
+</tr>
+<tr>
+<td>Release (arm straight)</td>
+<td>All</td>
+<td>Straightest shooting elbow at release</td>
+<td>155° or more</td>
+<td>Under 145°</td>
+<td>Research: about 160–168° at release (Cabarkapa 2023)</td>
+</tr>
+<tr>
+<td>Release angle</td>
+<td>Side</td>
+<td>Shooting arm angle above flat at release</td>
+<td>60° or more</td>
+<td>Under 52° (pushing out, flat shot)</td>
+<td>Starting point, based on ball release angles of about 50–55° (Cabarkapa 2021; Satern 1993)</td>
+</tr>
+<tr>
+<td>Follow-through hold</td>
+<td>All</td>
+<td>Seconds the arm stays up and straight after release</td>
+<td>0.7 s or more</td>
+<td>Under 0.5 s</td>
+<td>Coaching: hold it until the ball hits the rim (Breakthrough, Wissel). Starting point</td>
+</tr>
+<tr>
+<td>Wrist snap</td>
+<td>Side</td>
+<td>Fingers below the wrist after release</td>
+<td>Snapped</td>
+<td>Hand stays stiff</td>
+<td>Coaching: jr.nba.com ("snapping your wrist in a downward waving motion"), Wissel</td>
+</tr>
+<tr>
+<td>Base</td>
+<td>Front/back</td>
+<td>Ankle gap vs shoulder gap at the dip</td>
+<td>0.75–1.5×</td>
+<td>Under 0.55× or over 1.9×</td>
+<td>Coaching: feet about shoulder width (Wissel, Breakthrough). Starting point</td>
+</tr>
+<tr>
+<td>Balance (sideways)</td>
+<td>Front/back</td>
+<td>Hip movement from takeoff to landing</td>
+<td>Under 18 cm</td>
+<td>Over 30 cm</td>
+<td>Coaching: land where you took off (Breakthrough). Research: elite shooters drift more on long shots (Podmenik 2021), so this is loose on purpose</td>
+</tr>
+<tr>
+<td>Balance (fade)</td>
+<td>Side</td>
+<td>Hip movement forward or back</td>
+<td>Up to 65 cm forward</td>
+<td>Fading back more than 8 cm, or flying forward over 65 cm</td>
+<td>Coaching: "land a few inches in front" (Breakthrough). Research: elite shooters move 21–49 cm forward on jumpers (Podmenik 2021)</td>
+</tr>
+<tr>
+<td>Landing</td>
+<td>Side</td>
+<td>Trunk lean at landing</td>
+<td>Upright</td>
+<td>Leaning back over 15°</td>
+<td>Coaching: "head over your feet" (Wissel). Starting point</td>
+</tr>
+</tbody>
+</table></div>
+<h2>How a shot is detected</h2>
+<ol>
+<li>Both wrists drop below the shoulders (ball at the waist or pocket). The app is now armed.</li>
+<li>One wrist rises above the ears with the elbow nearly straight, within 1.6 s of being low. That's a shot. That arm is the shooting arm.</li>
+<li>The app keeps recording for 1.25 s to see the follow-through and landing, then grades the shot.</li>
+<li><strong>Set point</strong> is the moment the shooting forearm starts straightening fast (over 150°/s). That's where the ball launched from.</li>
+<li><strong>Release</strong> is the moment the elbow is straightest just after the trigger.</li>
+</ol>
+<h2>Feedback rules</h2>
+<ul>
+<li>Each shot gets one spoken line: one thing done well, then the most important fix.</li>
+<li>Fixes are ranked foundation-first, following Engelland's order (basics, then reps, then pressure) as Ben's notes describe it. The order is balance and base, set point, elbow and shot line, rhythm, guide hand, legs, release, follow-through.</li>
+<li>If the same fix comes up three shots in a row, the coach suggests slowing down and shooting close to the rim.</li>
+<li>The words follow Ben's kid-readable rule: short sentences, body-part terms, no coach jargon.</li>
+</ul>
+<h2>Known limits (be honest with testers)</h2>
+<ul>
+<li>No ball tracking, so no arc, spin, entry angle, or makes and misses.</li>
+<li>A single camera turns 3D motion into 2D. Angles are most accurate when the camera is square to the body (straight in front, behind, or to the side), not diagonal.</li>
+<li>Thresholds marked "starting point" are not validated. The next step is recording 20–30 shots from known good shooters and Dillon, then tuning.</li>
+<li>The voice comes from the phone's built-in text-to-speech. On iPhone, Settings → Accessibility → Spoken Content → Voices lets you download a higher-quality "Enhanced" or "Premium" voice. It will show up in the app's voice list.</li>
+</ul>
+<h2>Sources</h2>
+<ul>
+<li>Cabarkapa D. et al. (2021). Kinetic and kinematic characteristics of proficient and non-proficient 2-point and 3-point basketball shooters. <em>Sports</em>, 10(1), 2. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8822900">https://pmc.ncbi.nlm.nih.gov/articles/PMC8822900</a></li>
+<li>Cabarkapa D., Fry A.C., Carlson K.M., Poggio J.P., Deane M.A. (2021). Key kinematic components for optimal basketball free throw shooting performance. <em>Central European Journal of Sport Sciences and Medicine</em>, 36(4), 5–15. <a href="https://wnus.usz.edu.pl/cejssm/de/issue/1215/article/19306/">https://wnus.usz.edu.pl/cejssm/de/issue/1215/article/19306/</a></li>
+<li>Cabarkapa D. et al. (2023). Biomechanical characteristics of proficient free-throw shooters: markerless motion capture analysis. <em>Frontiers in Sports and Active Living</em>, 5:1208915. <a href="https://www.frontiersin.org/journals/sports-and-active-living/articles/10.3389/fspor.2023.1208915/pdf">https://www.frontiersin.org/journals/sports-and-active-living/articles/10.3389/fspor.2023.1208915/pdf</a></li>
+<li>University of Kansas (2022). Study photographically identifies characteristics that make proficient basketball scorers. <a href="https://news.ku.edu/2022/05/26/study-photographically-identifies-characteristics-make-proficient-basketball-scorers">https://news.ku.edu/2022/05/26/study-photographically-identifies-characteristics-make-proficient-basketball-scorers</a></li>
+<li>Podmenik N., Supej M., Debevec H., Erčulj F. (2021). Common movement patterns of the jump shot while increasing the distance from the basket in elite basketball players. <em>Journal of Human Kinetics</em>, 78, 29–39. <a href="https://johk.pl/wp-content/uploads/2023/04/10078-78-2021-v78-2021-03.pdf">https://johk.pl/wp-content/uploads/2023/04/10078-78-2021-v78-2021-03.pdf</a></li>
+<li>Satern M.N. (1993). Kinematic parameters of basketball jump shots projected from varying distances. ISBS Proceedings. <a href="https://ojs.ub.uni-konstanz.de/cpa/article/view/1736">https://ojs.ub.uni-konstanz.de/cpa/article/view/1736</a></li>
+<li>Slegers N., Love D. (2022). The role of ball backspin alignment and variability in basketball shooting. <em>Journal of Sports Sciences</em>. <a href="https://digitalcommons.georgefox.edu/mece_fac/130">https://digitalcommons.georgefox.edu/mece_fac/130</a></li>
+<li>Relationship between kinematic characteristics and free-throw shooting precision: markerless motion capture analysis (2023). ISBS Proceedings Archive 41(1). <a href="https://lida.sport-iat.de/dbb/Record/4083642?lng=en">https://lida.sport-iat.de/dbb/Record/4083642?lng=en</a></li>
+<li>Stojanović E. et al. (2019). Kinematic parameters of jump shot in elite male basketball players. <em>Facta Universitatis: Physical Education and Sport</em>, 17(2). <a href="https://casopisi.junis.ni.ac.rs/index.php/FUPhysEdSport/article/view/3908">https://casopisi.junis.ni.ac.rs/index.php/FUPhysEdSport/article/view/3908</a></li>
+<li>Wissel H. Shooting mechanics (via Coach's Clipboard). <a href="https://www.coachesclipboard.net/WisselShootingMechanics.html">https://www.coachesclipboard.net/WisselShootingMechanics.html</a></li>
+<li>Breakthrough Basketball. How to shoot a basketball: proper shooting form. <a href="https://www.breakthroughbasketball.com/fundamentals/shooting-technique">https://www.breakthroughbasketball.com/fundamentals/shooting-technique</a></li>
+<li>Jr. NBA. How to shoot a basketball. <a href="https://jr.nba.com/shooting/">https://jr.nba.com/shooting/</a></li>
+<li>Grantland. The Shot Doctor (Chip Engelland). <a href="https://grantland.com/features/the-shot-doctor/">https://grantland.com/features/the-shot-doctor/</a></li>
+<li>Further reading, not yet used for a number: Knudson D. (1993). Biomechanics of the basketball jump shot: six key teaching points. <em>JOPERD</em>.</li>
+</ul>
+</main></body></html>
