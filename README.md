@@ -25,8 +25,10 @@ You can also grade a saved video with **Grade a saved video instead**.
 | File | What it is |
 |---|---|
 | `index.html` | The app: camera, skeleton overlay, voice, setup and recap screens |
-| `coach.js` | Shot detection and grading. Every threshold is in `T` at the top with its source |
+| `coach.js` | Shot detection, grading, and what the coach says. Every threshold is in `T` at the top with its source |
+| `lines.js` | Every line the coach can say, including hype calls |
+| `audio/` | Studio voice clips, one folder per voice. Re-record with `python3 tools/render_voices.py` |
 | `RESEARCH.md` / `research.html` | What each check measures, from which angles, and the studies behind it. Rebuild the HTML with `python3 tools/build_research.py` |
-| `tests/` | `node tests/run.mjs` runs 37 simulated shots (good form plus specific flaws from every angle) through the engine |
+| `tests/` | `node tests/run.mjs` runs 39 checks: simulated shots (good form plus specific flaws from every angle), voice-line coverage, and the hype rules (good form plus specific flaws from every angle) through the engine |
 | `vendor/mediapipe/` | MediaPipe Tasks Vision 0.10.14 runtime (Apache 2.0) |
 | `models/` | Pose landmarker models: `full` (accurate) and `lite` (fast) |

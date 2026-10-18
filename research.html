@@ -204,19 +204,30 @@ th{font:500 11px/1.3 "SF Mono",ui-monospace,Menlo,monospace;letter-spacing:.08em
 <li><strong>Set point</strong> is the moment the shooting forearm starts straightening fast (over 150°/s). That's where the ball launched from.</li>
 <li><strong>Release</strong> is the moment the elbow is straightest just after the trigger.</li>
 </ol>
-<h2>Feedback rules</h2>
+<h2>How the coach talks</h2>
+<p>The coach's lines are written and delivered the way good coaches cue, not the way a manual reads.</p>
 <ul>
-<li>Each shot gets one spoken line: one thing done well, then the most important fix.</li>
-<li>Fixes are ranked foundation-first, following Engelland's order (basics, then reps, then pressure) as Ben's notes describe it. The order is balance and base, set point, elbow and shot line, rhythm, guide hand, legs, release, follow-through.</li>
-<li>If the same fix comes up three shots in a row, the coach suggests slowing down and shooting close to the rim.</li>
-<li>The words follow Ben's kid-readable rule: short sentences, body-part terms, no coach jargon.</li>
+<li><strong>One cue per rep.</strong> After every shot it says one thing done well, then the single most important fix. In a 2025 study of junior gymnasts, feedback on key elements only beat correcting every error at post-test (Niźnikowski et al. 2025). A cueing summary of Nick Winkelman's work puts it this way: "One clear external cue beats a checklist of internal instructions the athlete can't hold in mind while moving."</li>
+<li><strong>Point at the target when possible.</strong> Lines like "Point it at the rim," "Reach for the top of the square" and "Reach into the cookie jar" aim attention at the rim, the ball, or an image. In Gabriele Wulf's experiments, an external focus like this beat body-part instructions, and the advantage held after the cues were removed (Wulf et al. 1998). Some cues still name a body part when that's the clearest way to say it ("Elbow in").</li>
+<li><strong>Short and spoken.</strong> Each fix is under about 10 words, with contractions and two-beat rhythm ("Hold that finish. Don't drop it."). There's a short breath between the praise and the fix, and a longer one before a repeat warning.</li>
+<li><strong>Variety.</strong> Most cues have two or more phrasings, and the coach rotates them so back-to-back reps don't sound like a loop. Hype calls never repeat within five shots.</li>
+<li><strong>Hype on clean reps.</strong> When every check passes, the coach fires a hype call ("Ice in your veins!", "You've got that dog in you!"). At 3, 5 and 8 clean reps in a row it calls the streak. Hype is based on form only, because the camera can't see makes. It can be turned off.</li>
+<li><strong>Same fix three times running:</strong> the coach tells the player to slow down and shoot close to the rim, the foundations-first order from Ben's notes.</li>
+<li><strong>Ranking:</strong> fixes are ranked foundation-first, in this order: balance and base, set point, elbow and shot line, rhythm, guide hand, legs, release, follow-through.</li>
+<li><strong>Words:</strong> they follow Ben's kid-readable rule: short sentences, no coach jargon.</li>
+</ul>
+<h3>Voices</h3>
+<ul>
+<li><strong>Studio voices</strong> are clips recorded ahead of time with Kokoro-82M, an open-source neural text-to-speech model (Apache 2.0) that ranks among the most natural-sounding free voices. Every line is rendered in five voices: Michael, Fenrir and Puck (male), and Heart and Bella (female). Heart and Bella carry the model's top quality grades (A and A−); the male voices are rated C+. Each clip is trimmed and loudness-matched to −16 LUFS, so every line is equally loud.</li>
+<li><strong>Pace:</strong> hype lines run about 10% faster than normal, fixes slightly slower, for clarity. The average is about 3 words per second, a brisk coaching pace.</li>
+<li><strong>iPhone voice</strong> uses the phone's own text-to-speech as a fallback. It sounds better after you download an Enhanced or Premium voice in iOS Settings.</li>
+<li><strong>Changing lines:</strong> edit <code>lines.js</code>, then run <code>python3 tools/render_voices.py --model &lt;folder&gt;</code> to re-record only the lines that changed.</li>
 </ul>
 <h2>Known limits (be honest with testers)</h2>
 <ul>
 <li>No ball tracking, so no arc, spin, entry angle, or makes and misses.</li>
 <li>A single camera turns 3D motion into 2D. Angles are most accurate when the camera is square to the body (straight in front, behind, or to the side), not diagonal.</li>
 <li>Thresholds marked "starting point" are not validated. The next step is recording 20–30 shots from known good shooters and Dillon, then tuning.</li>
-<li>The voice comes from the phone's built-in text-to-speech. On iPhone, Settings → Accessibility → Spoken Content → Voices lets you download a higher-quality "Enhanced" or "Premium" voice. It will show up in the app's voice list.</li>
 </ul>
 <h2>Sources</h2>
 <ul>
@@ -233,6 +244,10 @@ th{font:500 11px/1.3 "SF Mono",ui-monospace,Menlo,monospace;letter-spacing:.08em
 <li>Breakthrough Basketball. How to shoot a basketball: proper shooting form. <a href="https://www.breakthroughbasketball.com/fundamentals/shooting-technique">https://www.breakthroughbasketball.com/fundamentals/shooting-technique</a></li>
 <li>Jr. NBA. How to shoot a basketball. <a href="https://jr.nba.com/shooting/">https://jr.nba.com/shooting/</a></li>
 <li>Grantland. The Shot Doctor (Chip Engelland). <a href="https://grantland.com/features/the-shot-doctor/">https://grantland.com/features/the-shot-doctor/</a></li>
+<li>Wulf G., Höß M., Prinz W. (1998). Instructions for motor learning: differential effects of internal versus external focus of attention. <em>Journal of Motor Behavior</em>, 30(2). Summary: <a href="https://us.humankinetics.com/blogs/excerpt/the-benefits-of-an-external-focus">https://us.humankinetics.com/blogs/excerpt/the-benefits-of-an-external-focus</a></li>
+<li>Coachway. Nick Winkelman: cueing for coaches. <a href="https://coachway.io/articles/nick-winkelman-cueing-for-coaches/">https://coachway.io/articles/nick-winkelman-cueing-for-coaches/</a></li>
+<li>Niźnikowski T. et al. (2025). Enhancing the learning of sports skills through verbal feedback. <em>Frontiers in Sports and Active Living</em>, 7. <a href="https://frontiersin.org/articles/10.3389/fspor.2025.1519365/full">https://frontiersin.org/articles/10.3389/fspor.2025.1519365/full</a></li>
+<li>Kokoro-82M voice model and voice grades. <a href="https://huggingface.co/hexgrad/Kokoro-82M/blob/main/VOICES.md">https://huggingface.co/hexgrad/Kokoro-82M/blob/main/VOICES.md</a></li>
 <li>Further reading, not yet used for a number: Knudson D. (1993). Biomechanics of the basketball jump shot: six key teaching points. <em>JOPERD</em>.</li>
 </ul>
 </main></body></html>

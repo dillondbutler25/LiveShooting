@@ -4,6 +4,8 @@
 // "src:" = a published study or coaching source (see RESEARCH.md).
 // "demo:" = a starting value picked for this demo; tune it after real testing.
 
+import { LINES, variants } from './lines.js';
+
 export const L = {
   nose: 0, lEar: 7, rEar: 8, lSh: 11, rSh: 12, lEl: 13, rEl: 14, lWr: 15, rWr: 16,
   lIdx: 19, rIdx: 20, lHip: 23, rHip: 24, lKn: 25, rKn: 26, lAn: 27, rAn: 28,
@@ -363,18 +365,21 @@ export function analyzeShot(shot, cfg) {
 const dist3 = (a, b) => (a && b ? Math.hypot(a.x - b.x, a.y - b.y, (a.z || 0) - (b.z || 0)) : NaN);
 
 // ---------- checks -> statuses ----------
+// Each check carries `key` (the fix line prefix in lines.js) and `pkey` (its praise prefix).
 const fin = Number.isFinite;
+const say1 = (prefix) => LINES[prefix + '.1'] || LINES[prefix] || '';
 function gradeChecks(m, c) {
   const out = [];
-  const add = (id, area, weight, status, sev, detail, cue, praise) => out.push({ id, area, weight, status, sev, detail, cue, praise });
-  const handWord = c.hand === 'L' ? 'left' : 'right';
+  const H = c.hand === 'L' ? 'L' : 'R';
+  const add = (id, area, weight, status, sev, detail, key, pkey) =>
+    out.push({ id, area, weight, status, sev, detail, key, pkey, cue: say1(key), praise: say1(pkey) });
 
   // Balance & base
   if (c.side === 'frontal' && fin(m.base)) {
-    const b = m.base;
-    if (b < T.baseNarrowFix) add('base', 'Base', 1, 'fix', 0.6, `Feet ${b.toFixed(2)}× shoulder width`, 'Widen your feet to about shoulder width.', 'Good base.');
-    else if (b > T.baseWideFix) add('base', 'Base', 1, 'fix', 0.5, `Feet ${b.toFixed(2)}× shoulder width`, 'Feet are too wide. Go about shoulder width.', 'Good base.');
-    else add('base', 'Base', 1, b >= T.baseGood[0] && b <= T.baseGood[1] ? 'good' : 'ok', 0.2, `Feet ${b.toFixed(2)}× shoulder width`, 'Set your feet about shoulder width.', 'Good base.');
+    const b = m.base, d = `Feet ${b.toFixed(2)}× shoulder width`;
+    if (b < T.baseNarrowFix) add('base', 'Base', 1, 'fix', 0.6, d, 'fix.base.narrow', 'praise.base');
+    else if (b > T.baseWideFix) add('base', 'Base', 1, 'fix', 0.5, d, 'fix.base.wide', 'praise.base');
+    else add('base', 'Base', 1, b >= T.baseGood[0] && b <= T.baseGood[1] ? 'good' : 'ok', 0.2, d, 'fix.base.ok', 'praise.base');
   }
   if (fin(m.driftSide)) {
     const d = Math.abs(m.driftSide);
@@ -382,60 +387,59 @@ function gradeChecks(m, c) {
     const towardLeft = c.view === 'front' ? m.driftSide > 0 : m.driftSide < 0;
     const dir = towardLeft ? 'left' : 'right';
     const st = d > T.sideDriftFix ? 'fix' : d > T.sideDriftOk ? 'ok' : 'good';
-    add('drift', 'Balance', 1, st, Math.min(1, d / 0.5), `Drifted ${(d * 100).toFixed(0)} cm ${dir}`, `You drifted to your ${dir}. Land where you took off.`, 'Landed balanced.');
+    add('drift', 'Balance', 1, st, Math.min(1, d / 0.5), `Drifted ${(d * 100).toFixed(0)} cm ${dir}`, `fix.drift.${dir}`, 'praise.drift');
   }
   if (fin(m.driftFwd)) {
     const d = m.driftFwd;
-    if (d < T.backFix) add('drift', 'Balance', 1, 'fix', Math.min(1, -d / 0.3), `Faded back ${(-d * 100).toFixed(0)} cm`, 'You faded back. Jump up, and land a little forward.', 'Landed balanced.');
-    else if (d > T.fwdFix) add('drift', 'Balance', 1, 'fix', 0.5, `Jumped forward ${(d * 100).toFixed(0)} cm`, 'You jumped way forward. Go more up than out.', 'Landed balanced.');
-    else add('drift', 'Balance', 1, 'good', 0, `Landed ${(d * 100).toFixed(0)} cm forward`, '', 'Landed balanced.');
+    if (d < T.backFix) add('drift', 'Balance', 1, 'fix', Math.min(1, -d / 0.3), `Faded back ${(-d * 100).toFixed(0)} cm`, 'fix.drift.back', 'praise.drift');
+    else if (d > T.fwdFix) add('drift', 'Balance', 1, 'fix', 0.5, `Jumped forward ${(d * 100).toFixed(0)} cm`, 'fix.drift.fwd', 'praise.drift');
+    else add('drift', 'Balance', 1, 'good', 0, `Landed ${(d * 100).toFixed(0)} cm forward`, 'fix.drift.back', 'praise.drift');
   }
   if (fin(m.leanBack) && m.leanBack > T.leanBackFix) {
-    add('lean', 'Landing', 0.95, 'fix', Math.min(1, m.leanBack / 35), `Leaning back ${m.leanBack.toFixed(0)}° at landing`, 'You landed leaning back. Keep your chest over your feet.', '');
+    add('lean', 'Landing', 0.95, 'fix', Math.min(1, m.leanBack / 35), `Leaning back ${m.leanBack.toFixed(0)}° at landing`, 'fix.lean', 'praise.drift');
   }
 
   // Set point
   if (fin(m.setHeight)) {
     const h = m.setHeight;
-    if (h > T.setHighFix) add('setHeight', 'Set height', 0.95, 'fix', Math.min(1, (h - 0.4) / 0.6), 'Ball set on top of the head', 'Stop the ball at your forehead, not on top of your head.', 'Great set point.');
-    else if (h > T.setHighOk) add('setHeight', 'Set height', 0.95, 'ok', 0.3, 'Set point a little high', 'Stop the ball a bit lower, right above your eyebrow.', 'Great set point.');
-    else if (h < T.setLowFix || m.lowSet) add('setHeight', 'Set height', 0.95, 'fix', 0.6, 'Ball pushed from below the chin', 'Lift the ball higher before you shoot. Get it above your eyes.', 'Great set point.');
-    else add('setHeight', 'Set height', 0.95, 'good', 0, 'Set point at forehead height', '', 'Great set point.');
+    if (h > T.setHighFix) add('setHeight', 'Set height', 0.95, 'fix', Math.min(1, (h - 0.4) / 0.6), 'Ball set on top of the head', 'fix.setHeight.high', 'praise.setHeight');
+    else if (h > T.setHighOk) add('setHeight', 'Set height', 0.95, 'ok', 0.3, 'Set point a little high', 'fix.setHeight.ok', 'praise.setHeight');
+    else if (h < T.setLowFix || m.lowSet) add('setHeight', 'Set height', 0.95, 'fix', 0.6, 'Ball pushed from below the chin', 'fix.setHeight.low', 'praise.setHeight');
+    else add('setHeight', 'Set height', 0.95, 'good', 0, 'Set point at forehead height', 'fix.setHeight.high', 'praise.setHeight');
   }
   if (fin(m.setForward)) {
     const s = m.setForward;
     const st = s < T.setBehindFix ? 'fix' : s < T.setBehindOk ? 'ok' : 'good';
-    add('setBehind', 'Ball in front', 0.95, st, Math.min(1, -s / 0.8), st === 'good' ? 'Ball in front of the head' : 'Ball went behind the head', 'The ball went behind your head. Keep it in front of your forehead.', 'Ball stayed in front of your face.');
+    add('setBehind', 'Ball in front', 0.95, st, Math.min(1, -s / 0.8), st === 'good' ? 'Ball in front of the head' : 'Ball went behind the head', 'fix.setBehind', 'praise.setBehind');
   }
   if (fin(m.setLateral)) {
     const s = m.setLateral;
-    if (s < T.latCenterFix) add('setLat', 'Shooting pocket', 0.9, 'fix', 0.7, 'Ball in the middle of the head', `The ball is in the middle of your head. Move it over your ${handWord} eye.`, 'Ball on your shooting side.');
-    else if (s > T.latWideFix) add('setLat', 'Shooting pocket', 0.9, 'fix', 0.5, 'Ball far outside the shoulder', `Ball's too far outside. Bring it in, over your ${handWord} eye.`, 'Ball on your shooting side.');
-    else add('setLat', 'Shooting pocket', 0.9, s >= T.latGood ? 'good' : 'ok', 0.25, 'Ball lined up on the shooting side', `Move the ball a little more over your ${handWord} eye.`, 'Ball on your shooting side.');
+    if (s < T.latCenterFix) add('setLat', 'Shooting pocket', 0.9, 'fix', 0.7, 'Ball in the middle of the head', `fix.setLat.center.${H}`, 'praise.setLat');
+    else if (s > T.latWideFix) add('setLat', 'Shooting pocket', 0.9, 'fix', 0.5, 'Ball far outside the shoulder', `fix.setLat.wide.${H}`, 'praise.setLat');
+    else add('setLat', 'Shooting pocket', 0.9, s >= T.latGood ? 'good' : 'ok', 0.25, 'Ball lined up on the shooting side', `fix.setLat.ok.${H}`, 'praise.setLat');
   }
 
-  // Elbow
+  // Elbow & line
   if (fin(m.flare)) {
     const a = m.flare;
     const st = a > T.flareFix ? 'fix' : a > T.flareOk ? 'ok' : 'good';
-    add('elbow', 'Elbow', 0.9, st, Math.min(1, a / 40), `Forearm tilted ${Math.max(0, a).toFixed(0)}° off vertical`, 'Elbow in. Keep it right under the ball, pointing at the rim.', 'Elbow right under the ball.');
+    add('elbow', 'Elbow', 0.9, st, Math.min(1, a / 40), `Forearm tilted ${Math.max(0, a).toFixed(0)}° off vertical`, 'fix.elbow', 'praise.elbow');
   }
   if (fin(m.releaseLine)) {
     const l = m.releaseLine;
     const st = Math.abs(l) > T.lineFix ? 'fix' : Math.abs(l) > T.lineOk ? 'ok' : 'good';
-    const cue = l < 0 ? 'Your arm crossed in front of your face. Shoot straight up your shooting side.' : 'Your arm swung out to the side. Shoot straight at the rim.';
-    add('line', 'Shot line', 0.85, st, Math.min(1, Math.abs(l)), st === 'good' ? 'Straight shot line' : l < 0 ? 'Arm crossed toward the middle' : 'Arm swung outside', cue, 'Straight shot line.');
+    add('line', 'Shot line', 0.85, st, Math.min(1, Math.abs(l)), st === 'good' ? 'Straight shot line' : l < 0 ? 'Arm crossed toward the middle' : 'Arm swung outside', l < 0 ? 'fix.line.in' : 'fix.line.out', 'praise.line');
   }
 
   // Timing
   if (c.jumped && fin(m.relVsApex)) {
     const d = m.relVsApex;
     const st = d > T.apexLateFix ? 'fix' : d > T.apexLateOk ? 'ok' : 'good';
-    add('timing', 'Rhythm', 0.85, st, Math.min(1, d / 0.35), `Release ${d >= 0 ? (d * 1000).toFixed(0) + ' ms after' : (-d * 1000).toFixed(0) + ' ms before'} the top of the jump`, "You're shooting on the way down. Let it go at the top of your jump.", 'Legs and arm worked together.');
+    add('timing', 'Rhythm', 0.85, st, Math.min(1, d / 0.35), `Release ${d >= 0 ? (d * 1000).toFixed(0) + ' ms after' : (-d * 1000).toFixed(0) + ' ms before'} the top of the jump`, 'fix.timing.late', 'praise.timing');
   } else if (fin(m.legGap)) {
     const g = m.legGap;
     const st = g > T.legGapFix ? 'fix' : g > T.legGapOk ? 'ok' : 'good';
-    add('timing', 'Rhythm', 0.85, st, Math.min(1, g / 0.6), `Arm fired ${(g * 1000).toFixed(0)} ms after the legs`, "Legs and arm together. Don't wait at the top before you shoot.", 'Legs and arm worked together.');
+    add('timing', 'Rhythm', 0.85, st, Math.min(1, g / 0.6), `Arm fired ${(g * 1000).toFixed(0)} ms after the legs`, 'fix.timing.gap', 'praise.timing');
   }
 
   // Guide hand
@@ -444,69 +448,102 @@ function gradeChecks(m, c) {
     const fixAt = c.side === 'frontal' ? T.guideFix : T.guideFwdFix;
     const okAt = c.side === 'frontal' ? T.guideOk : T.guideFwdFix * 0.66;
     const st = g > fixAt ? 'fix' : g > okAt ? 'ok' : 'good';
-    add('guide', 'Guide hand', 0.8, st, Math.min(1, g / (fixAt * 2)), st === 'good' ? 'Guide hand stayed quiet' : 'Guide hand pushed the ball', 'Quiet guide hand. It just holds the side of the ball, no push.', 'Quiet guide hand.');
+    add('guide', 'Guide hand', 0.8, st, Math.min(1, g / (fixAt * 2)), st === 'good' ? 'Guide hand stayed quiet' : 'Guide hand pushed the ball', 'fix.guide', 'praise.guide');
   }
 
   // Legs
   if (c.legsVisible && fin(m.knee)) {
-    const k = m.knee;
-    if (k > T.kneeOk) add('knees', 'Legs', 0.75, 'fix', Math.min(1, (k - 135) / 30), `Knees bent to ${k.toFixed(0)}°`, 'Bend your knees more. Your legs are your power.', 'Good knee bend.');
-    else if (k > T.kneeGood[1]) add('knees', 'Legs', 0.75, 'ok', 0.3, `Knees bent to ${k.toFixed(0)}°`, 'Sit into your shot a little more.', 'Good knee bend.');
-    else if (k < T.kneeTooDeep) add('knees', 'Legs', 0.75, 'fix', 0.4, `Knees bent to ${k.toFixed(0)}°`, "Don't sit so low. A quick medium dip is enough.", 'Good knee bend.');
-    else add('knees', 'Legs', 0.75, 'good', 0, `Knees bent to ${k.toFixed(0)}°`, '', 'Good knee bend.');
+    const k = m.knee, d = `Knees bent to ${k.toFixed(0)}°`;
+    if (k > T.kneeOk) add('knees', 'Legs', 0.75, 'fix', Math.min(1, (k - 135) / 30), d, 'fix.knees.shallow', 'praise.knees');
+    else if (k > T.kneeGood[1]) add('knees', 'Legs', 0.75, 'ok', 0.3, d, 'fix.knees.ok', 'praise.knees');
+    else if (k < T.kneeTooDeep) add('knees', 'Legs', 0.75, 'fix', 0.4, d, 'fix.knees.deep', 'praise.knees');
+    else add('knees', 'Legs', 0.75, 'good', 0, d, 'fix.knees.shallow', 'praise.knees');
   }
 
   // Release
   if (fin(m.ext)) {
     const e = m.ext;
     const st = e < T.extOk ? 'fix' : e < T.extGood ? 'ok' : 'good';
-    add('ext', 'Release', 0.7, st, Math.min(1, (165 - e) / 35), `Elbow ${e.toFixed(0)}° at release`, 'Finish tall. Straighten your shooting arm all the way.', 'Nice tall finish.');
+    add('ext', 'Release', 0.7, st, Math.min(1, (165 - e) / 35), `Elbow ${e.toFixed(0)}° at release`, 'fix.ext', 'praise.ext');
   }
   if (fin(m.armAngle)) {
     const a = m.armAngle;
     const st = a < T.armFix ? 'fix' : a < T.armOk ? 'ok' : 'good';
-    add('arc', 'Release', 0.7, st, Math.min(1, (65 - a) / 25), `Arm ${a.toFixed(0)}° above flat at release`, 'Shoot up, not out. Reach high toward the rim.', 'Good arc on your release.');
+    add('arc', 'Release angle', 0.7, st, Math.min(1, (65 - a) / 25), `Arm ${a.toFixed(0)}° above flat at release`, 'fix.arc', 'praise.arc');
   }
 
   // Finish
   if (fin(m.hold)) {
     const h = m.hold;
     const st = h >= T.holdGood || m.holdCapped ? 'good' : h >= T.holdOk ? 'ok' : 'fix';
-    add('hold', 'Follow-through', 0.6, st, Math.min(1, (0.8 - h) / 0.8), `Held the finish ${m.holdCapped ? '1.2+' : h.toFixed(2)} s`, 'Hold your follow-through until the ball hits the rim.', 'Nice hold on the follow-through.');
+    add('hold', 'Follow-through', 0.6, st, Math.min(1, (0.8 - h) / 0.8), `Held the finish ${m.holdCapped ? '1.2+' : h.toFixed(2)} s`, 'fix.hold', 'praise.hold');
   }
   if (fin(m.snap)) {
     const st = m.snap >= 0.4 ? 'good' : m.snap >= 0.15 ? 'ok' : 'fix';
-    add('snap', 'Follow-through', 0.5, st, 0.5, st === 'good' ? 'Wrist snapped down' : 'Wrist stayed stiff', 'Snap your wrist. Fingers point down at the rim.', 'Good wrist snap.');
+    add('snap', 'Wrist snap', 0.5, st, 0.5, st === 'good' ? 'Wrist snapped down' : 'Wrist stayed stiff', 'fix.snap', 'praise.snap');
   }
   return out;
 }
 
 // ---------- spoken feedback ----------
-// One praise + one fix, short enough to hear before the next rep.
+// Returns the clip ids to play, in order. Rules (see RESEARCH.md):
+// - Clean rep: a hype call (never one of the last few), or a streak call at 3/5/8.
+// - Otherwise: one praise, a beat, then the single most important fix.
+// - Same fix three reps running: suggest slowing down and going close.
 export class Voice {
-  constructor() { this.lastPraise = ''; this.fixStreak = { id: '', n: 0 }; }
-  compose(result) {
-    if (result.error) return { say: "Couldn't read that one. Stay fully in frame.", top: null };
-    const checks = result.checks;
-    const fixes = checks.filter((c) => c.status === 'fix').sort((a, b) => b.weight * (0.5 + b.sev) - a.weight * (0.5 + a.sev));
-    const oks = checks.filter((c) => c.status === 'ok').sort((a, b) => b.weight - a.weight);
-    const goods = checks.filter((c) => c.status === 'good' && c.praise).sort((a, b) => b.weight - a.weight);
-    let praise = goods.find((g) => g.praise !== this.lastPraise) || goods[0];
-    const top = fixes[0] || oks[0] || null;
-    let say = '';
-    if (!top) {
-      say = `Clean shot. ${praise ? praise.praise : ''}`.trim();
-    } else {
-      if (praise) say += praise.praise + ' ';
-      say += top.status === 'ok' && !fixes.length ? 'Small thing: ' + lowerFirst(top.cue) : top.cue;
-      if (this.fixStreak.id === top.id) this.fixStreak.n++; else this.fixStreak = { id: top.id, n: 1 };
-      if (this.fixStreak.n === 3) say += ' Third time in a row. Slow it down and try a few close to the rim.';
-    }
-    if (praise) this.lastPraise = praise.praise;
-    return { say, top };
+  constructor(opts = {}) {
+    this.hype = opts.hype ?? true;
+    this.recentHype = [];
+    this.lastPraise = '';
+    this.fixStreak = { id: '', n: 0 };
+    this.cleanStreak = 0;
+    this.turn = {};
+    this.rand = opts.rand || Math.random;
   }
+  // Rotate through a cue's phrasings so back-to-back reps don't sound identical.
+  pick(prefix) {
+    const v = variants(prefix);
+    if (!v.length) return LINES[prefix] ? prefix : null;
+    const i = (this.turn[prefix] = ((this.turn[prefix] ?? -1) + 1) % v.length);
+    return v[i];
+  }
+  pickHype() {
+    const pool = variants('hype').filter((id) => !this.recentHype.includes(id));
+    const id = pool[Math.floor(this.rand() * pool.length)];
+    this.recentHype.push(id);
+    if (this.recentHype.length > 5) this.recentHype.shift();
+    return id;
+  }
+  compose(result) {
+    if (result.error) { this.cleanStreak = 0; return this.out(['sys.cantread'], null); }
+    const checks = result.checks;
+    const rank = (c) => c.weight * (0.5 + c.sev);
+    const fixes = checks.filter((c) => c.status === 'fix').sort((a, b) => rank(b) - rank(a));
+    const oks = checks.filter((c) => c.status === 'ok').sort((a, b) => b.weight - a.weight);
+    const goods = checks.filter((c) => c.status === 'good').sort((a, b) => b.weight - a.weight);
+    const praise = goods.find((g) => g.pkey !== this.lastPraise) || goods[0];
+    const top = fixes[0] || oks[0] || null;
+    const ids = [];
+    if (!top) {
+      this.cleanStreak++;
+      this.fixStreak = { id: '', n: 0 };
+      const s = this.cleanStreak;
+      if (this.hype && (s === 3 || s === 5 || s === 8)) ids.push(`streak.${s}`);
+      else if (this.hype) ids.push(this.pickHype());
+      else { ids.push(this.pick('clean')); if (praise) ids.push(this.pick(praise.pkey)); }
+    } else {
+      this.cleanStreak = 0;
+      if (praise) ids.push(this.pick(praise.pkey));
+      if (top.status === 'ok' && !fixes.length) ids.push('sys.smallthing');
+      ids.push(this.pick(top.key));
+      if (this.fixStreak.id === top.id) this.fixStreak.n++; else this.fixStreak = { id: top.id, n: 1 };
+      if (this.fixStreak.n === 3) ids.push('sys.repeat');
+    }
+    if (praise) this.lastPraise = praise.pkey;
+    return this.out(ids.filter(Boolean), top);
+  }
+  out(ids, top) { return { ids, say: ids.map((id) => LINES[id]).join(' '), top }; }
 }
-const lowerFirst = (s) => s.charAt(0).toLowerCase() + s.slice(1);
 
 // ---------- session summary ----------
 export function summarize(results) {

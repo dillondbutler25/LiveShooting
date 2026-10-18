@@ -1,0 +1,370 @@
+{
+"clean.1": {
+"dur": 0.77,
+"h": "7e5303ea38"
+},
+"clean.2": {
+"dur": 0.77,
+"h": "3c8f626f5a"
+},
+"fix.arc.1": {
+"dur": 2.45,
+"h": "13ee9df952"
+},
+"fix.arc.2": {
+"dur": 1.92,
+"h": "7042562310"
+},
+"fix.base.narrow.1": {
+"dur": 1.92,
+"h": "6974bcb956"
+},
+"fix.base.narrow.2": {
+"dur": 1.82,
+"h": "28a3f9e20d"
+},
+"fix.base.ok.1": {
+"dur": 1.39,
+"h": "cbbf8c9d45"
+},
+"fix.base.wide.1": {
+"dur": 2.59,
+"h": "d5510909dd"
+},
+"fix.drift.back.1": {
+"dur": 2.93,
+"h": "8c36f32337"
+},
+"fix.drift.back.2": {
+"dur": 1.7,
+"h": "c11ebd1e74"
+},
+"fix.drift.fwd.1": {
+"dur": 1.78,
+"h": "c8d7bdcdbb"
+},
+"fix.drift.left.1": {
+"dur": 2.06,
+"h": "476e19451b"
+},
+"fix.drift.left.2": {
+"dur": 2.59,
+"h": "30ef19da1f"
+},
+"fix.drift.right.1": {
+"dur": 1.97,
+"h": "419ee5736a"
+},
+"fix.drift.right.2": {
+"dur": 2.59,
+"h": "dd1a491c0b"
+},
+"fix.elbow.1": {
+"dur": 1.46,
+"h": "2a798378f5"
+},
+"fix.elbow.2": {
+"dur": 1.78,
+"h": "af84805f06"
+},
+"fix.ext.1": {
+"dur": 1.8,
+"h": "e2548e3597"
+},
+"fix.ext.2": {
+"dur": 1.54,
+"h": "b52faf6bc3"
+},
+"fix.guide.1": {
+"dur": 2.26,
+"h": "1c2a18ea4f"
+},
+"fix.guide.2": {
+"dur": 2.88,
+"h": "2be72287fd"
+},
+"fix.hold.1": {
+"dur": 2.33,
+"h": "aebbe594fd"
+},
+"fix.hold.2": {
+"dur": 1.63,
+"h": "1044bb819b"
+},
+"fix.knees.deep.1": {
+"dur": 2.26,
+"h": "807b700596"
+},
+"fix.knees.ok.1": {
+"dur": 1.46,
+"h": "814b931bff"
+},
+"fix.knees.shallow.1": {
+"dur": 2.28,
+"h": "311a565704"
+},
+"fix.knees.shallow.2": {
+"dur": 2.11,
+"h": "7491587e3c"
+},
+"fix.lean.1": {
+"dur": 2.42,
+"h": "8308d47f4e"
+},
+"fix.line.in.1": {
+"dur": 3.36,
+"h": "8d53b71cee"
+},
+"fix.line.out.1": {
+"dur": 2.33,
+"h": "814c6e2f14"
+},
+"fix.setBehind.1": {
+"dur": 2.5,
+"h": "7407de983e"
+},
+"fix.setBehind.2": {
+"dur": 3.05,
+"h": "10239e2c6f"
+},
+"fix.setHeight.high.1": {
+"dur": 2.9,
+"h": "3b73b693fe"
+},
+"fix.setHeight.high.2": {
+"dur": 2.4,
+"h": "a7ac86db4d"
+},
+"fix.setHeight.low.1": {
+"dur": 2.14,
+"h": "2ee9479b27"
+},
+"fix.setHeight.low.2": {
+"dur": 2.69,
+"h": "cddee52231"
+},
+"fix.setHeight.ok.1": {
+"dur": 2.59,
+"h": "2552282d24"
+},
+"fix.setLat.center.L.1": {
+"dur": 3.26,
+"h": "89213bac16"
+},
+"fix.setLat.center.R.1": {
+"dur": 3.19,
+"h": "e90458133d"
+},
+"fix.setLat.ok.L.1": {
+"dur": 2.28,
+"h": "b7fd5091d3"
+},
+"fix.setLat.ok.R.1": {
+"dur": 2.33,
+"h": "96eac7d145"
+},
+"fix.setLat.wide.L.1": {
+"dur": 3.22,
+"h": "f00ed4c1fd"
+},
+"fix.setLat.wide.R.1": {
+"dur": 3.22,
+"h": "d64348fdff"
+},
+"fix.snap.1": {
+"dur": 2.33,
+"h": "d5af13f0f3"
+},
+"fix.snap.2": {
+"dur": 2.02,
+"h": "a94e30ccf1"
+},
+"fix.timing.gap.1": {
+"dur": 2.64,
+"h": "d090cd127e"
+},
+"fix.timing.gap.2": {
+"dur": 2.64,
+"h": "b5a0083978"
+},
+"fix.timing.late.1": {
+"dur": 2.71,
+"h": "ff236d1928"
+},
+"fix.timing.late.2": {
+"dur": 2.18,
+"h": "35692111a0"
+},
+"hype.1": {
+"dur": 1.1,
+"h": "987cf75b7e"
+},
+"hype.10": {
+"dur": 1.58,
+"h": "f849794c19"
+},
+"hype.11": {
+"dur": 1.22,
+"h": "ce76c318ec"
+},
+"hype.12": {
+"dur": 0.67,
+"h": "2d84550fc4"
+},
+"hype.13": {
+"dur": 0.96,
+"h": "342a483adc"
+},
+"hype.14": {
+"dur": 1.51,
+"h": "b7b1ef04e3"
+},
+"hype.2": {
+"dur": 1.01,
+"h": "834d187f75"
+},
+"hype.3": {
+"dur": 0.96,
+"h": "60dfc127e8"
+},
+"hype.4": {
+"dur": 1.18,
+"h": "714584269f"
+},
+"hype.5": {
+"dur": 1.22,
+"h": "4d81df03a2"
+},
+"hype.6": {
+"dur": 1.34,
+"h": "a306662d6b"
+},
+"hype.7": {
+"dur": 1.1,
+"h": "59b2db4fd8"
+},
+"hype.8": {
+"dur": 1.06,
+"h": "9f16c41bbf"
+},
+"hype.9": {
+"dur": 0.91,
+"h": "4511ed3f62"
+},
+"praise.arc.1": {
+"dur": 1.1,
+"h": "68592eb2db"
+},
+"praise.base.1": {
+"dur": 0.77,
+"h": "912c1e16eb"
+},
+"praise.base.2": {
+"dur": 1.06,
+"h": "18ebd8c1b9"
+},
+"praise.drift.1": {
+"dur": 0.94,
+"h": "c1f8a196fa"
+},
+"praise.drift.2": {
+"dur": 1.01,
+"h": "932038486e"
+},
+"praise.elbow.1": {
+"dur": 1.13,
+"h": "8349ff339c"
+},
+"praise.elbow.2": {
+"dur": 0.82,
+"h": "b9c47d5f20"
+},
+"praise.ext.1": {
+"dur": 1.08,
+"h": "80a24dd6c7"
+},
+"praise.guide.1": {
+"dur": 1.06,
+"h": "646685e8b7"
+},
+"praise.hold.1": {
+"dur": 0.94,
+"h": "4393320e40"
+},
+"praise.hold.2": {
+"dur": 1.32,
+"h": "46c29f2a09"
+},
+"praise.knees.1": {
+"dur": 0.74,
+"h": "326f632ce4"
+},
+"praise.knees.2": {
+"dur": 0.89,
+"h": "fd04bbaf83"
+},
+"praise.line.1": {
+"dur": 1.08,
+"h": "e71213db1a"
+},
+"praise.setBehind.1": {
+"dur": 1.58,
+"h": "ea01527d7a"
+},
+"praise.setHeight.1": {
+"dur": 0.94,
+"h": "6282a70015"
+},
+"praise.setHeight.2": {
+"dur": 1.13,
+"h": "644819618a"
+},
+"praise.setLat.1": {
+"dur": 1.75,
+"h": "33dff12f87"
+},
+"praise.snap.1": {
+"dur": 0.94,
+"h": "2b943ac072"
+},
+"praise.timing.1": {
+"dur": 0.84,
+"h": "d49ae56396"
+},
+"praise.timing.2": {
+"dur": 1.8,
+"h": "aead1305da"
+},
+"streak.3": {
+"dur": 1.68,
+"h": "231266b7cd"
+},
+"streak.5": {
+"dur": 1.82,
+"h": "92d4ef0f8c"
+},
+"streak.8": {
+"dur": 1.32,
+"h": "3832b4ad6e"
+},
+"sys.cantread": {
+"dur": 1.92,
+"h": "1f741b37f9"
+},
+"sys.ready": {
+"dur": 1.58,
+"h": "c854686bcb"
+},
+"sys.repeat": {
+"dur": 3.58,
+"h": "0c1cadee1c"
+},
+"sys.session": {
+"dur": 1.54,
+"h": "3c1fda4401"
+},
+"sys.smallthing": {
+"dur": 0.82,
+"h": "1643bbc219"
+}
+}

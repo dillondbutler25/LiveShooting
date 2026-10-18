@@ -48,19 +48,31 @@ Side view from the shooting-hand side is the most reliable for arm readings (rig
 4. **Set point** is the moment the shooting forearm starts straightening fast (over 150°/s). That's where the ball launched from.
 5. **Release** is the moment the elbow is straightest just after the trigger.
 
-## Feedback rules
+## How the coach talks
 
-- Each shot gets one spoken line: one thing done well, then the most important fix.
-- Fixes are ranked foundation-first, following Engelland's order (basics, then reps, then pressure) as Ben's notes describe it. The order is balance and base, set point, elbow and shot line, rhythm, guide hand, legs, release, follow-through.
-- If the same fix comes up three shots in a row, the coach suggests slowing down and shooting close to the rim.
-- The words follow Ben's kid-readable rule: short sentences, body-part terms, no coach jargon.
+The coach's lines are written and delivered the way good coaches cue, not the way a manual reads.
+
+- **One cue per rep.** After every shot it says one thing done well, then the single most important fix. In a 2025 study of junior gymnasts, feedback on key elements only beat correcting every error at post-test (Niźnikowski et al. 2025). A cueing summary of Nick Winkelman's work puts it this way: "One clear external cue beats a checklist of internal instructions the athlete can't hold in mind while moving."
+- **Point at the target when possible.** Lines like "Point it at the rim," "Reach for the top of the square" and "Reach into the cookie jar" aim attention at the rim, the ball, or an image. In Gabriele Wulf's experiments, an external focus like this beat body-part instructions, and the advantage held after the cues were removed (Wulf et al. 1998). Some cues still name a body part when that's the clearest way to say it ("Elbow in").
+- **Short and spoken.** Each fix is under about 10 words, with contractions and two-beat rhythm ("Hold that finish. Don't drop it."). There's a short breath between the praise and the fix, and a longer one before a repeat warning.
+- **Variety.** Most cues have two or more phrasings, and the coach rotates them so back-to-back reps don't sound like a loop. Hype calls never repeat within five shots.
+- **Hype on clean reps.** When every check passes, the coach fires a hype call ("Ice in your veins!", "You've got that dog in you!"). At 3, 5 and 8 clean reps in a row it calls the streak. Hype is based on form only, because the camera can't see makes. It can be turned off.
+- **Same fix three times running:** the coach tells the player to slow down and shoot close to the rim, the foundations-first order from Ben's notes.
+- **Ranking:** fixes are ranked foundation-first, in this order: balance and base, set point, elbow and shot line, rhythm, guide hand, legs, release, follow-through.
+- **Words:** they follow Ben's kid-readable rule: short sentences, no coach jargon.
+
+### Voices
+
+- **Studio voices** are clips recorded ahead of time with Kokoro-82M, an open-source neural text-to-speech model (Apache 2.0) that ranks among the most natural-sounding free voices. Every line is rendered in five voices: Michael, Fenrir and Puck (male), and Heart and Bella (female). Heart and Bella carry the model's top quality grades (A and A−); the male voices are rated C+. Each clip is trimmed and loudness-matched to −16 LUFS, so every line is equally loud.
+- **Pace:** hype lines run about 10% faster than normal, fixes slightly slower, for clarity. The average is about 3 words per second, a brisk coaching pace.
+- **iPhone voice** uses the phone's own text-to-speech as a fallback. It sounds better after you download an Enhanced or Premium voice in iOS Settings.
+- **Changing lines:** edit `lines.js`, then run `python3 tools/render_voices.py --model <folder>` to re-record only the lines that changed.
 
 ## Known limits (be honest with testers)
 
 - No ball tracking, so no arc, spin, entry angle, or makes and misses.
 - A single camera turns 3D motion into 2D. Angles are most accurate when the camera is square to the body (straight in front, behind, or to the side), not diagonal.
 - Thresholds marked "starting point" are not validated. The next step is recording 20–30 shots from known good shooters and Dillon, then tuning.
-- The voice comes from the phone's built-in text-to-speech. On iPhone, Settings → Accessibility → Spoken Content → Voices lets you download a higher-quality "Enhanced" or "Premium" voice. It will show up in the app's voice list.
 
 ## Sources
 
@@ -77,4 +89,8 @@ Side view from the shooting-hand side is the most reliable for arm readings (rig
 - Breakthrough Basketball. How to shoot a basketball: proper shooting form. https://www.breakthroughbasketball.com/fundamentals/shooting-technique
 - Jr. NBA. How to shoot a basketball. https://jr.nba.com/shooting/
 - Grantland. The Shot Doctor (Chip Engelland). https://grantland.com/features/the-shot-doctor/
+- Wulf G., Höß M., Prinz W. (1998). Instructions for motor learning: differential effects of internal versus external focus of attention. *Journal of Motor Behavior*, 30(2). Summary: https://us.humankinetics.com/blogs/excerpt/the-benefits-of-an-external-focus
+- Coachway. Nick Winkelman: cueing for coaches. https://coachway.io/articles/nick-winkelman-cueing-for-coaches/
+- Niźnikowski T. et al. (2025). Enhancing the learning of sports skills through verbal feedback. *Frontiers in Sports and Active Living*, 7. https://frontiersin.org/articles/10.3389/fspor.2025.1519365/full
+- Kokoro-82M voice model and voice grades. https://huggingface.co/hexgrad/Kokoro-82M/blob/main/VOICES.md
 - Further reading, not yet used for a number: Knudson D. (1993). Biomechanics of the basketball jump shot: six key teaching points. *JOPERD*.

@@ -97,6 +97,13 @@ details.why summary{cursor:pointer;font-weight:600}
 details.why p,details.why li{color:var(--dim);font-size:13px}
 details.why a{color:var(--text)}
 .foot{color:var(--dim);font-size:12px;margin:0}
+.voices{display:grid;gap:8px}
+.vrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:stretch}
+.vrow .opt{flex-direction:row;align-items:center;gap:10px}
+.vrow .opt .vtxt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.play{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:0 14px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.play[aria-busy="true"]{opacity:.6}
+.hint{font-size:12.5px;color:var(--dim);margin:0}
 
 /* summary */
 .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
@@ -186,18 +193,28 @@ td.n{font-variant-numeric:tabular-nums;text-align:right;width:3.2em}
           <button class="opt" data-model="lite" aria-pressed="false"><b>Fast</b><small>For older phones</small></button>
         </div>
       </div>
-      <div class="setrow"><span class="label">Coach voice</span>
-        <div class="row"><select id="voiceSel" aria-label="Coach voice"><option>Default voice</option></select>
-        <button class="iconbtn" id="testVoice" style="background:var(--panel2)">Test</button></div>
+    </div>
+
+    <div class="card">
+      <h2>3. Coach voice</h2>
+      <p class="hint">Studio voices are recorded with a neural voice model, so they sound like a person instead of a robot. Tap Hear it to compare.</p>
+      <div class="voices" id="voiceList"></div>
+      <div class="row" id="deviceRow" hidden><select id="voiceSel" aria-label="iPhone voice"><option>Default voice</option></select></div>
+      <p class="hint" id="deviceHint" hidden>For a better iPhone voice: Settings → Accessibility → Spoken Content → Voices → English, and download an "Enhanced" or "Premium" voice. Then reload this page.</p>
+      <div class="setrow"><span class="label">Hype calls</span>
+        <div class="seg c2" id="hypeSeg">
+          <button class="opt" data-hype="on" aria-pressed="true"><b>On</b><small>"Ice in your veins!" on clean reps</small></button>
+          <button class="opt" data-hype="off" aria-pressed="false"><b>Off</b><small>Just the coaching</small></button>
+        </div>
       </div>
     </div>
 
     <div class="card">
-      <h2>3. Before you shoot</h2>
+      <h2>4. Before you shoot</h2>
       <ul class="tips">
         <li>Prop the phone up <b>about waist high, 10–15 feet away</b>, standing up tall (portrait).</li>
         <li>Your <b>whole body plus your arms overhead</b> must fit in the frame. Check the screen before you start.</li>
-        <li>Turn the <b>ringer on and volume up</b>, or the voice can't play.</li>
+        <li>Turn the <b>volume up</b>. If you hear nothing, flip the ringer switch on.</li>
         <li>Shoot <b>form shots first</b>, 5–10 feet out. Then move back.</li>
         <li>After each shot, bring the ball back down to your waist to reset.</li>
       </ul>
@@ -246,10 +263,11 @@ td.n{font-variant-numeric:tabular-nums;text-align:right;width:3.2em}
 <script type="module">
 import { FilesetResolver, PoseLandmarker } from './vendor/mediapipe/vision_bundle.js';
 import { ShotDetector, analyzeShot, Voice, Smoother, summarize } from './coach.js';
+import { LINES } from './lines.js';
 
 const $ = (id) => document.getElementById(id);
 const video = $('video'), canvas = $('overlay'), ctx = canvas.getContext('2d');
-const S = { view: 'front', hand: 'R', cam: 'user', model: 'full', voiceURI: '', muted: false };
+const S = { view: 'front', hand: 'R', cam: 'user', model: 'full', voice: 'michael', hype: 'on', voiceURI: '', muted: false };
 try { Object.assign(S, JSON.parse(localStorage.getItem('lsc-settings') || '{}')); } catch {}
 const save = () => { try { localStorage.setItem('lsc-settings', JSON.stringify(S)); } catch {} };
 
@@ -276,14 +294,60 @@ function refreshViewText() {
     txt += ' <br>Heads-up: from this side your shooting arm is farther from the camera, so arm readings are less reliable.';
   $('viewChecks').innerHTML = txt;
 }
-bindSeg('viewSeg', 'view', 'view'); bindSeg('handSeg', 'hand', 'hand'); bindSeg('camSeg', 'cam', 'cam'); bindSeg('modelSeg', 'model', 'model');
+bindSeg('viewSeg', 'view', 'view'); bindSeg('handSeg', 'hand', 'hand'); bindSeg('camSeg', 'cam', 'cam'); bindSeg('modelSeg', 'model', 'model'); bindSeg('hypeSeg', 'hype', 'hype');
 refreshViewText();
 
 // ---------- voice ----------
+// Studio voices: pre-recorded clips (audio/<voice>/<line id>.mp3), played through
+// Web Audio so they start instantly and chain with natural beats between lines.
+// iPhone voice: the phone's own text-to-speech, as a fallback.
+const STUDIO = [
+  { id: 'michael', name: 'Michael', desc: 'Male · lower pitch, steady pace' },
+  { id: 'fenrir', name: 'Fenrir', desc: 'Male · brighter, quicker pace' },
+  { id: 'puck', name: 'Puck', desc: 'Male · lower pitch, quicker pace' },
+  { id: 'heart', name: 'Heart', desc: 'Female · highest-rated for natural sound' },
+  { id: 'bella', name: 'Bella', desc: 'Female · clear and bright' },
+];
+const SAMPLE = ['praise.knees.1', 'fix.hold.1', 'hype.3'];
+// Beat after each kind of line, in seconds. A short breath after praise,
+// a longer one before a repeat warning, the way a coach actually talks.
+const gapAfter = (id, next) => (!next ? 0 : id.startsWith('praise') || id.startsWith('clean') ? 0.22 : id === 'sys.smallthing' ? 0.1 : next === 'sys.repeat' ? 0.4 : next.startsWith('hype') ? 0.55 : 0.18);
+
+const audio = {
+  ctx: null, buf: {}, live: [],
+  unlock() {
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch {}
+    if (!this.ctx) { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return; this.ctx = new AC(); }
+    if (this.ctx.state !== 'running') this.ctx.resume();
+    const b = this.ctx.createBuffer(1, 1, 22050), src = this.ctx.createBufferSource(); src.buffer = b; src.connect(this.ctx.destination); src.start(0);
+  },
+  decode(ab) { return new Promise((res, rej) => { const p = this.ctx.decodeAudioData(ab, res, rej); if (p && p.then) p.then(res, rej); }); },
+  async load(voice, ids) {
+    if (!this.ctx) return;
+    const store = (this.buf[voice] ||= {});
+    const todo = ids.filter((id) => !store[id]);
+    let i = 0;
+    const worker = async () => { while (i < todo.length) { const id = todo[i++];
+      try { const r = await fetch(`audio/${voice}/${id}.mp3`); if (r.ok) store[id] = await this.decode(await r.arrayBuffer()); } catch (e) { console.warn('clip', id, e); } } };
+    await Promise.all(Array.from({ length: 6 }, worker));
+  },
+  has(voice, ids) { return ids.every((id) => this.buf[voice]?.[id]); },
+  stop() { for (const s of this.live) { try { s.stop(); } catch {} } this.live = []; },
+  play(voice, ids) {
+    this.stop();
+    let t = this.ctx.currentTime + 0.03;
+    ids.forEach((id, k) => {
+      const b = this.buf[voice][id]; const src = this.ctx.createBufferSource();
+      src.buffer = b; src.connect(this.ctx.destination); src.start(t); this.live.push(src);
+      t += b.duration + gapAfter(id, ids[k + 1]);
+    });
+  },
+};
+
 let voices = [];
 const PREFERRED = ['premium', 'enhanced', 'neural', 'natural', 'samantha', 'ava', 'evan', 'nathan', 'allison', 'aaron', 'daniel', 'google us english'];
 function loadVoices() {
-  if (!('speechSynthesis' in window)) { $('voiceSel').innerHTML = '<option>Voice not supported here</option>'; return; }
+  if (!('speechSynthesis' in window)) { $('voiceSel').innerHTML = '<option>Not supported here</option>'; return; }
   voices = speechSynthesis.getVoices().filter((v) => /^en(-|_|$)/i.test(v.lang));
   const score = (v) => { const n = v.name.toLowerCase(); const i = PREFERRED.findIndex((p) => n.includes(p)); return (i < 0 ? 99 : i) + (v.lang === 'en-US' ? 0 : 0.5); };
   voices.sort((a, b) => score(a) - score(b));
@@ -294,15 +358,43 @@ function loadVoices() {
 }
 if ('speechSynthesis' in window) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
 $('voiceSel').addEventListener('change', (e) => { S.voiceURI = e.target.value; save(); });
-function speak(text, force) {
-  if (!('speechSynthesis' in window) || (S.muted && !force) || !text) return;
+function deviceSay(ids) {
+  if (!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  const v = voices.find((x) => x.voiceURI === S.voiceURI); if (v) { u.voice = v; u.lang = v.lang; }
-  u.rate = 1.04; u.pitch = 1; u.volume = 1;
-  speechSynthesis.speak(u);
+  const v = voices.find((x) => x.voiceURI === S.voiceURI);
+  for (const id of ids) { // one utterance per line gives a natural break between them
+    const u = new SpeechSynthesisUtterance(LINES[id] || id);
+    if (v) { u.voice = v; u.lang = v.lang; }
+    u.rate = id.startsWith('hype') || id.startsWith('streak') ? 1.08 : 0.98; u.pitch = 1;
+    speechSynthesis.speak(u);
+  }
 }
-$('testVoice').addEventListener('click', () => speak('Good knee bend. Hold your follow-through until the ball hits the rim.', true));
+// Say a list of line ids in the chosen voice. Falls back to the iPhone voice if clips aren't loaded.
+function say(ids, force) {
+  if ((S.muted && !force) || !ids?.length) return;
+  if (S.voice !== 'device' && audio.ctx && audio.has(S.voice, ids)) audio.play(S.voice, ids);
+  else deviceSay(ids);
+}
+function renderVoiceList() {
+  $('voiceList').innerHTML = [...STUDIO, { id: 'device', name: 'iPhone voice', desc: 'Built-in text-to-speech' }].map((v) => `
+    <div class="vrow"><button class="opt" data-voice="${v.id}" aria-pressed="${S.voice === v.id}"><span class="vtxt"><b>${v.name}</b><small>${v.desc}</small></span></button>
+    <button class="play" data-hear="${v.id}">Hear it</button></div>`).join('');
+  $('deviceRow').hidden = $('deviceHint').hidden = S.voice !== 'device';
+}
+renderVoiceList();
+$('voiceList').addEventListener('click', async (e) => {
+  const pick = e.target.closest('[data-voice]'), hear = e.target.closest('[data-hear]');
+  if (pick) { S.voice = pick.dataset.voice; save(); renderVoiceList(); }
+  if (hear) {
+    const v = hear.dataset.hear;
+    audio.unlock();
+    if (v === 'device') return deviceSay(SAMPLE);
+    hear.setAttribute('aria-busy', 'true'); hear.textContent = 'Loading';
+    await audio.load(v, SAMPLE);
+    hear.removeAttribute('aria-busy'); hear.textContent = 'Hear it';
+    if (audio.has(v, SAMPLE)) audio.play(v, SAMPLE); else msg("Couldn't load that voice. Check your connection.");
+  }
+});
 
 // ---------- pose model ----------
 let landmarker = null, loadedModel = '';
@@ -327,7 +419,7 @@ const fpsTimes = [];
 
 function newSession() {
   results = [];
-  voice = new Voice();
+  voice = new Voice({ hype: S.hype !== 'off' });
   smoother = new Smoother(0.6);
   detector = new ShotDetector({ onShot });
   $('shotNo').textContent = 'READY'; $('shotSub').textContent = "Shoot when you're set";
@@ -336,7 +428,8 @@ function newSession() {
 }
 
 async function startCamera() {
-  unlockSpeech();
+  unlockSpeech(); audio.unlock();
+  const clips = S.voice === 'device' ? null : audio.load(S.voice, Object.keys(LINES));
   $('startBtn').disabled = true; $('fileBtn').disabled = true;
   try {
     if (!window.isSecureContext) throw Object.assign(new Error('insecure'), { name: 'Insecure' });
@@ -345,10 +438,11 @@ async function startCamera() {
     video.srcObject = stream; video.removeAttribute('src');
     await video.play();
     await ensureModel();
+    if (clips) { msg('Loading the coach voice.'); await clips; }
     source = 'camera';
     $('stage').classList.toggle('mirror', S.cam === 'user');
     go();
-    speak("Coach is ready. Take a shot when you're set.", true);
+    say(['sys.ready'], true);
   } catch (e) {
     console.error(e);
     stopStream();
@@ -363,12 +457,14 @@ async function startCamera() {
 
 $('fileIn').addEventListener('change', async (e) => {
   const file = e.target.files[0]; if (!file) return;
-  unlockSpeech();
+  unlockSpeech(); audio.unlock();
+  const clips = S.voice === 'device' ? null : audio.load(S.voice, Object.keys(LINES));
   $('startBtn').disabled = true; $('fileBtn').disabled = true;
   try {
     stopStream();
     video.srcObject = null; video.src = URL.createObjectURL(file); video.loop = false;
     await ensureModel();
+    if (clips) await clips;
     source = 'file';
     $('stage').classList.remove('mirror');
     await video.play();
@@ -406,7 +502,7 @@ $('fileBtn').addEventListener('click', () => $('fileIn').click());
 $('stopBtn').addEventListener('click', () => { finish(); });
 $('againBtn').addEventListener('click', () => { if (source === 'camera' && stream) go(); else { $('summary').hidden = true; $('setup').hidden = false; } });
 $('setupBtn').addEventListener('click', () => { stopStream(); video.srcObject = null; $('summary').hidden = true; $('hud').hidden = true; $('setup').hidden = false; });
-function setMute(m) { S.muted = m; save(); $('muteBtn').textContent = m ? 'Voice off' : 'Voice on'; $('muteBtn').setAttribute('aria-pressed', String(m)); if (m) window.speechSynthesis?.cancel(); }
+function setMute(m) { S.muted = m; save(); $('muteBtn').textContent = m ? 'Voice off' : 'Voice on'; $('muteBtn').setAttribute('aria-pressed', String(m)); if (m) { window.speechSynthesis?.cancel(); audio.stop(); } }
 $('muteBtn').addEventListener('click', () => setMute(!S.muted));
 $('detailsBtn').addEventListener('click', () => { const d = $('details'); d.hidden = !d.hidden; $('detailsBtn').textContent = d.hidden ? 'Show numbers' : 'Hide numbers'; });
 
@@ -479,10 +575,11 @@ function onShot(shot) {
   const r = analyzeShot(shot, { view: S.view, hand: S.hand });
   results.push(r);
   const n = results.length;
-  const { say, top } = voice.compose(r);
-  speak(say);
+  const line = voice.compose(r);
+  const top = line.top;
+  say(line.ids);
   $('shotNo').textContent = `SHOT ${n}`;
-  $('cue').textContent = say;
+  $('cue').textContent = line.say;
   if (r.error) { $('shotSub').textContent = 'Not graded'; $('chips').innerHTML = ''; $('detailsBtn').hidden = true; return; }
   $('shotSub').textContent = top ? top.area : 'All checks passed';
   const order = { fix: 0, ok: 1, good: 2 };
@@ -515,11 +612,11 @@ function showSummary() {
     s.rows.map((r) => `<tr><td>${r.area}</td><td class="n">${r.fix}</td><td class="n">${r.ok}</td><td class="n">${r.good}</td></tr>`).join('');
   $('sumTableCard').hidden = !s.graded;
   $('summary').hidden = false;
-  if (s.topFix) speak(`Session done. ${s.graded} shots. Main thing to work on: ${s.topFix.area}.`);
+  if (s.shots) say(['sys.session']);
 }
 
 // Expose for testing in a desktop browser.
-window.__lsc = { S, get results() { return results; }, feed: (frames) => frames.forEach((f) => detector.push(f)), get state() { return detector?.state; } };
+window.__lsc = { S, audio, get results() { return results; }, feed: (frames) => frames.forEach((f) => detector.push(f)), get state() { return detector?.state; } };
 </script>
 </body>
 </html>
