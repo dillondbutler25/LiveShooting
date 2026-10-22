@@ -287,15 +287,15 @@ refreshViewText();
 // iPhone voice: the phone's own text-to-speech, as a fallback.
 const STUDIO = [
   { id: 'michael', name: 'Michael', desc: 'Male · lower pitch, steady pace' },
-  { id: 'fenrir', name: 'Fenrir', desc: 'Male · brighter, quicker pace' },
-  { id: 'puck', name: 'Puck', desc: 'Male · lower pitch, quicker pace' },
+  { id: 'fenrir', name: 'Fenrir', desc: 'Male · brighter' },
+  { id: 'puck', name: 'Puck', desc: 'Male · lower pitch, lighter' },
   { id: 'heart', name: 'Heart', desc: 'Female · highest-rated for natural sound' },
   { id: 'bella', name: 'Bella', desc: 'Female · clear and bright' },
 ];
 const SAMPLE = ['praise.knees.1', 'fix.hold.1'];
 // Beat after each kind of line, in seconds. A short breath after praise,
 // a longer one before a repeat warning, the way a coach actually talks.
-const gapAfter = (id, next) => (!next ? 0 : id.startsWith('praise') || id.startsWith('clean') ? 0.22 : id === 'sys.smallthing' ? 0.1 : next === 'sys.repeat' ? 0.4 : next.startsWith('hype') ? 0.55 : 0.18);
+const gapAfter = (id, next) => (!next ? 0 : id.startsWith('praise') || id.startsWith('clean') ? 0.32 : id === 'sys.smallthing' ? 0.1 : next === 'sys.repeat' ? 0.4 : next.startsWith('hype') ? 0.55 : 0.18);
 
 const audio = {
   ctx: null, buf: {}, live: [],
@@ -312,7 +312,7 @@ const audio = {
     const todo = ids.filter((id) => !store[id]);
     let i = 0;
     const worker = async () => { while (i < todo.length) { const id = todo[i++];
-      try { const r = await fetch(`audio/${voice}/${id}.mp3`); if (r.ok) store[id] = await this.decode(await r.arrayBuffer()); } catch (e) { console.warn('clip', id, e); } } };
+      try { const r = await fetch(`audio/${voice}/${id}.mp3?v=2`); if (r.ok) store[id] = await this.decode(await r.arrayBuffer()); } catch (e) { console.warn('clip', id, e); } } };
     await Promise.all(Array.from({ length: 6 }, worker));
   },
   has(voice, ids) { return ids.every((id) => this.buf[voice]?.[id]); },

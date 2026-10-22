@@ -63,8 +63,8 @@ The coach's lines are written and delivered the way good coaches cue, not the wa
 
 ### Voices
 
-- **Studio voices** are clips recorded ahead of time with Kokoro-82M, an open-source neural text-to-speech model (Apache 2.0) that ranks among the most natural-sounding free voices. Every line is rendered in five voices: Michael, Fenrir and Puck (male), and Heart and Bella (female). Heart and Bella carry the model's top quality grades (A and A−); the male voices are rated C+. Each clip is trimmed and loudness-matched to −16 LUFS, so every line is equally loud.
-- **Pace:** hype lines run about 10% faster than normal, fixes slightly slower, for clarity. The average is about 3 words per second, a brisk coaching pace.
+- **Studio voices** are clips recorded ahead of time with Kokoro-82M, an open-source neural text-to-speech model (Apache 2.0) that ranks among the most natural-sounding free voices. Every line is rendered in five voices: Michael, Fenrir and Puck (male), and Heart and Bella (female). Heart and Bella carry the model's top quality grades (A and A−); the male voices are rated C+. Each clip is trimmed and loudness-matched to −16 LUFS, so every line is equally loud, and saved at 96 kbps.
+- **Pace:** the clips are rendered a bit slower than Kokoro's default (fixes at about 0.9×, praise about 0.93×), because rushing it is what makes it sound clipped and robotic. Every line also gets a small repeatable tempo wobble (±3%), so two lines never share the exact same speed. Praise is followed by a slightly longer breath than before.
 - **iPhone voice** uses the phone's own text-to-speech as a fallback. It sounds better after you download an Enhanced or Premium voice in iOS Settings.
 - **Changing lines:** edit `lines.js`, then run `python3 tools/render_voices.py --model <folder>` to re-record only the lines that changed.
 

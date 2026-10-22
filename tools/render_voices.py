@@ -19,7 +19,14 @@ VOICES = {  # folder name -> Kokoro voice id
     'bella': 'af_bella',
 }
 # Delivery per kind of line: hype a bit quicker, fixes at a clear, even pace.
-SPEED = {'hype': 1.1, 'streak': 1.1, 'clean': 1.05, 'praise': 1.05, 'fix': 0.98, 'sys': 1.0}
+# Kokoro sounds most natural a touch slower than its default. Rushing it (above 1.0)
+# is what makes it sound clipped and robotic. Each line also gets a small, repeatable
+# speed wobble (+/-3%) so two lines never come out with the exact same tempo.
+SPEED = {'hype': 1.0, 'streak': 1.0, 'clean': 0.93, 'praise': 0.93, 'fix': 0.9, 'sys': 0.93}
+def speed_for(lid):
+    base = SPEED.get(lid.split('.')[0], 0.95)
+    wob = (int(hashlib.sha1(lid.encode()).hexdigest()[:4], 16) / 0xFFFF - 0.5) * 0.06
+    return round(base * (1 + wob), 3)
 
 def lines():
     js = "import('./lines.js').then(m=>process.stdout.write(JSON.stringify(m.LINES)))"
@@ -41,11 +48,11 @@ def main():
         manifest = json.loads(man_path.read_text()) if man_path.exists() else {}
         done = 0
         for lid, text in L.items():
-            h = hashlib.sha1(f'{vid}|{SPEED.get(lid.split(".")[0], 1)}|{text}'.encode()).hexdigest()[:10]
+            h = hashlib.sha1(f'{vid}|{speed_for(lid)}|{text}|v2'.encode()).hexdigest()[:10]
             mp3 = out / f'{lid}.mp3'
             if manifest.get(lid, {}).get('h') == h and mp3.exists():
                 continue
-            audio, sr = k.create(text, voice=vid, speed=SPEED.get(lid.split('.')[0], 1.0), lang='en-us')
+            audio, sr = k.create(text, voice=vid, speed=speed_for(lid), lang='en-us')
             with tempfile.NamedTemporaryFile(suffix='.wav') as tmp:
                 sf.write(tmp.name, audio, sr)
                 # trim leading/trailing silence, then match loudness
@@ -53,7 +60,7 @@ def main():
                       'areverse,silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.05,areverse,'
                       'loudnorm=I=-16:TP=-1.5:LRA=11')
                 subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-i', tmp.name, '-af', af,
-                                '-ar', '24000', '-ac', '1', '-c:a', 'libmp3lame', '-b:a', '64k', str(mp3)], check=True)
+                                '-ar', '24000', '-ac', '1', '-c:a', 'libmp3lame', '-b:a', '96k', str(mp3)], check=True)
             dur = float(subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', str(mp3)]))
             manifest[lid] = {'h': h, 'dur': round(dur, 2)}
             done += 1
