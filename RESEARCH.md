@@ -1,6 +1,6 @@
-# Live Shot Coach: what it grades and why
+# LiveShooting: what it grades and why
 
-This is the research behind the Live Shot Coach demo, written so it can be ported into CourtVision later. It covers every check the app runs, the camera angles each one works from, the target numbers, and where those numbers come from.
+This is the research behind the LiveShooting demo, written so it can be ported into CourtVision later. It covers every check the app runs, the camera angles each one works from, the target numbers, and where those numbers come from.
 
 **How to read the "Basis" column**
 - **Research**: the number comes from a published study.
@@ -42,7 +42,7 @@ Side view from the shooting-hand side is the most reliable for arm readings (rig
 
 ## How a shot is detected
 
-1. Both wrists drop below the shoulders (ball at the waist or pocket). The app is now armed.
+1. The app is armed when the ball is in both hands. The camera can't see the ball, so it looks for the posture: both wrists close together (within about 0.75 torso lengths), off the hips, no higher than the ears, and still for 0.25 s. This works at any height, so no waist reset is needed. Hands hanging at the sides, or both arms up overhead, don't count. (Dropping both wrists below the shoulders still arms it, as before.) Starting-point numbers, to be tuned.
 2. One wrist rises above the ears with the elbow nearly straight, within 1.6 s of being low. That's a shot. That arm is the shooting arm.
 3. The app keeps recording for 1.25 s to see the follow-through and landing, then grades the shot.
 4. **Set point** is the moment the shooting forearm starts straightening fast (over 150°/s). That's where the ball launched from.
@@ -56,7 +56,7 @@ The coach's lines are written and delivered the way good coaches cue, not the wa
 - **Point at the target when possible.** Lines like "Point it at the rim," "Reach for the top of the square" and "Reach into the cookie jar" aim attention at the rim, the ball, or an image. In Gabriele Wulf's experiments, an external focus like this beat body-part instructions, and the advantage held after the cues were removed (Wulf et al. 1998). Some cues still name a body part when that's the clearest way to say it ("Elbow in").
 - **Short and spoken.** Each fix is under about 10 words, with contractions and two-beat rhythm ("Hold that finish. Don't drop it."). There's a short breath between the praise and the fix, and a longer one before a repeat warning.
 - **Variety.** Most cues have two or more phrasings, and the coach rotates them so back-to-back reps don't sound like a loop. Hype calls never repeat within five shots.
-- **Hype on clean reps.** When every check passes, the coach fires a hype call ("Ice in your veins!", "You've got that dog in you!"). At 3, 5 and 8 clean reps in a row it calls the streak. Hype is based on form only, because the camera can't see makes. It can be turned off.
+- **Hype on clean reps (switched off for now, until the voice is right).** When every check passes, the coach fires a hype call ("Ice in your veins!", "You've got that dog in you!"). At 3, 5 and 8 clean reps in a row it calls the streak. Hype is based on form only, because the camera can't see makes. The code is still there; the app currently runs with it off.
 - **Same fix three times running:** the coach tells the player to slow down and shoot close to the rim, the foundations-first order from Ben's notes.
 - **Ranking:** fixes are ranked foundation-first, in this order: balance and base, set point, elbow and shot line, rhythm, guide hand, legs, release, follow-through.
 - **Words:** they follow Ben's kid-readable rule: short sentences, no coach jargon.

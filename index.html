@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a0a0c">
-<title>Live Shot Coach</title>
+<title>LiveShooting</title>
 <style>
 /* Layout: full-screen camera stage; setup and summary slide up as sheets over it. */
 :root{
@@ -146,7 +146,7 @@ td.n{font-variant-numeric:tabular-nums;text-align:right;width:3.2em}
   <div class="wrap">
     <div>
       <span class="label">CourtVision · live demo</span>
-      <h1>Live Shot <em>Coach</em></h1>
+      <h1>Live<em>Shooting</em></h1>
     </div>
     <p class="lede">Prop up your phone, shoot, and hear a coaching cue right after every rep. It tracks 33 points on your body and grades the fundamentals the camera can see from where it sits.</p>
 
@@ -155,7 +155,7 @@ td.n{font-variant-numeric:tabular-nums;text-align:right;width:3.2em}
       <div class="seg c4" id="viewSeg">
         <button class="opt" data-view="front" aria-pressed="true">
           <svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="10" r="5" fill="none" stroke="#ff6b1a" stroke-width="2"/><rect x="18" y="31" width="8" height="10" rx="1.5" fill="#ececef"/><circle cx="22" cy="10" r="1.5" fill="#ff6b1a"/><path d="M22 18v9" stroke="#8f8f99" stroke-dasharray="2 2"/></svg>
-          <b>In front</b><small>Faces you, set off to one side so the ball misses it</small>
+          <b>In front</b><small>Faces you, in line with you and the rim.</small>
         </button>
         <button class="opt" data-view="back" aria-pressed="false">
           <svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="30" r="5" fill="none" stroke="#ff6b1a" stroke-width="2"/><rect x="18" y="3" width="8" height="10" rx="1.5" fill="#ececef"/><path d="M22 15v9" stroke="#8f8f99" stroke-dasharray="2 2"/><path d="M14 41h16" stroke="#8f8f99"/></svg>
@@ -181,18 +181,6 @@ td.n{font-variant-numeric:tabular-nums;text-align:right;width:3.2em}
           <button class="opt" data-hand="L" aria-pressed="false"><b>Left</b></button>
         </div>
       </div>
-      <div class="setrow"><span class="label">Camera</span>
-        <div class="seg c2" id="camSeg" >
-          <button class="opt" data-cam="user" aria-pressed="true"><b>Selfie</b><small>You can see the screen</small></button>
-          <button class="opt" data-cam="environment" aria-pressed="false"><b>Back</b><small>Sharper, wider</small></button>
-        </div>
-      </div>
-      <div class="setrow"><span class="label">Tracking</span>
-        <div class="seg c2" id="modelSeg" >
-          <button class="opt" data-model="full" aria-pressed="true"><b>Accurate</b><small>Best for grading</small></button>
-          <button class="opt" data-model="lite" aria-pressed="false"><b>Fast</b><small>For older phones</small></button>
-        </div>
-      </div>
     </div>
 
     <div class="card">
@@ -201,12 +189,6 @@ td.n{font-variant-numeric:tabular-nums;text-align:right;width:3.2em}
       <div class="voices" id="voiceList"></div>
       <div class="row" id="deviceRow" hidden><select id="voiceSel" aria-label="iPhone voice"><option>Default voice</option></select></div>
       <p class="hint" id="deviceHint" hidden>For a better iPhone voice: Settings → Accessibility → Spoken Content → Voices → English, and download an "Enhanced" or "Premium" voice. Then reload this page.</p>
-      <div class="setrow"><span class="label">Hype calls</span>
-        <div class="seg c2" id="hypeSeg">
-          <button class="opt" data-hype="on" aria-pressed="true"><b>On</b><small>"Ice in your veins!" on clean reps</small></button>
-          <button class="opt" data-hype="off" aria-pressed="false"><b>Off</b><small>Just the coaching</small></button>
-        </div>
-      </div>
     </div>
 
     <div class="card">
@@ -216,7 +198,7 @@ td.n{font-variant-numeric:tabular-nums;text-align:right;width:3.2em}
         <li>Your <b>whole body plus your arms overhead</b> must fit in the frame. Check the screen before you start.</li>
         <li>Turn the <b>volume up</b>. If you hear nothing, flip the ringer switch on.</li>
         <li>Shoot <b>form shots first</b>, 5–10 feet out. Then move back.</li>
-        <li>After each shot, bring the ball back down to your waist to reset.</li>
+        <li>Before each shot, <b>hold the ball in both hands for a beat</b>, wherever your set point is. That's how the coach knows a shot is coming.</li>
       </ul>
     </div>
 
@@ -267,9 +249,11 @@ import { LINES } from './lines.js';
 
 const $ = (id) => document.getElementById(id);
 const video = $('video'), canvas = $('overlay'), ctx = canvas.getContext('2d');
-const S = { view: 'front', hand: 'R', cam: 'user', model: 'full', voice: 'michael', hype: 'on', voiceURI: '', muted: false };
-try { Object.assign(S, JSON.parse(localStorage.getItem('lsc-settings') || '{}')); } catch {}
-const save = () => { try { localStorage.setItem('lsc-settings', JSON.stringify(S)); } catch {} };
+const S = { view: 'front', hand: 'R', cam: 'environment', model: 'full', voice: 'michael', hype: 'off', voiceURI: '', muted: false };
+try { Object.assign(S, JSON.parse(localStorage.getItem('liveshooting-settings') || '{}')); } catch {}
+// Always the back camera, accurate tracking, and no hype calls (for now), whatever an older save says.
+S.cam = 'environment'; S.model = 'full'; S.hype = 'off';
+const save = () => { try { localStorage.setItem('liveshooting-settings', JSON.stringify(S)); } catch {} };
 
 const VIEW_NAMES = { front: 'In front', back: 'Behind', right: 'Right side', left: 'Left side' };
 const VIEW_CHECKS = {
@@ -294,7 +278,7 @@ function refreshViewText() {
     txt += ' <br>Heads-up: from this side your shooting arm is farther from the camera, so arm readings are less reliable.';
   $('viewChecks').innerHTML = txt;
 }
-bindSeg('viewSeg', 'view', 'view'); bindSeg('handSeg', 'hand', 'hand'); bindSeg('camSeg', 'cam', 'cam'); bindSeg('modelSeg', 'model', 'model'); bindSeg('hypeSeg', 'hype', 'hype');
+bindSeg('viewSeg', 'view', 'view'); bindSeg('handSeg', 'hand', 'hand'); 
 refreshViewText();
 
 // ---------- voice ----------
@@ -308,7 +292,7 @@ const STUDIO = [
   { id: 'heart', name: 'Heart', desc: 'Female · highest-rated for natural sound' },
   { id: 'bella', name: 'Bella', desc: 'Female · clear and bright' },
 ];
-const SAMPLE = ['praise.knees.1', 'fix.hold.1', 'hype.3'];
+const SAMPLE = ['praise.knees.1', 'fix.hold.1'];
 // Beat after each kind of line, in seconds. A short breath after praise,
 // a longer one before a repeat warning, the way a coach actually talks.
 const gapAfter = (id, next) => (!next ? 0 : id.startsWith('praise') || id.startsWith('clean') ? 0.22 : id === 'sys.smallthing' ? 0.1 : next === 'sys.repeat' ? 0.4 : next.startsWith('hype') ? 0.55 : 0.18);
@@ -440,7 +424,7 @@ async function startCamera() {
     await ensureModel();
     if (clips) { msg('Loading the coach voice.'); await clips; }
     source = 'camera';
-    $('stage').classList.toggle('mirror', S.cam === 'user');
+    $('stage').classList.remove('mirror');
     go();
     say(['sys.ready'], true);
   } catch (e) {
@@ -450,7 +434,7 @@ async function startCamera() {
     msg(n === 'NotAllowedError' ? 'Camera blocked. On iPhone: Settings → Safari → Camera → Allow, then reload this page. If you opened this inside another app, open it in Safari instead.'
       : n === 'Insecure' ? 'The camera only works over a secure https link. Open the GitHub Pages link in Safari.'
       : n === 'NoMedia' ? "This browser can't use the camera here. Open the link in Safari or Chrome."
-      : n === 'NotFoundError' || n === 'OverconstrainedError' ? 'No camera found. Try switching between Selfie and Back camera.'
+      : n === 'NotFoundError' || n === 'OverconstrainedError' ? 'No back camera found on this device.'
       : 'Something went wrong starting the coach: ' + (e.message || n) + '. Reload and try again.');
   } finally { $('startBtn').disabled = false; $('fileBtn').disabled = false; }
 }
@@ -547,8 +531,7 @@ function framingStatus(p, H) {
   if (head < 0.5) return setStatus('warn', 'Show your head');
   if (Math.min(p[7].y, p[8].y, p[0].y) < H * 0.16) return setStatus('warn', 'Need room above your head');
   if (Math.max(p[27].y, p[28].y) > H * 0.985) return setStatus('warn', 'Feet at the edge');
-  if (fpsTimes.length && fpsTimes.length < 14 && source === 'camera' && S.model === 'full') return setStatus('warn', 'Slow: switch to Fast');
-  setStatus('good', detector.state === 'arming' ? 'Ball to your waist' : 'Ready');
+  setStatus('good', detector.state === 'arming' ? 'Hold the ball in both hands' : 'Ready');
 }
 
 const BONES = [[11, 12], [11, 13], [13, 15], [12, 14], [14, 16], [11, 23], [12, 24], [23, 24], [23, 25], [25, 27], [24, 26], [26, 28], [27, 31], [28, 32], [15, 19], [16, 20]];
@@ -604,7 +587,7 @@ function showSummary() {
     [f(s.hold, 1, ' s'), 'Follow-through hold'],
   ].map(([b, t]) => `<div class="stat"><b>${b}</b><span>${t}</span></div>`).join('');
   $('sumFocus').innerHTML = !s.shots
-    ? '<h2>Nothing to grade yet</h2><p class="lede">Make sure your whole body and both arms overhead fit in the frame, and bring the ball down to your waist between shots.</p>'
+    ? '<h2>Nothing to grade yet</h2><p class="lede">Make sure your whole body and both arms overhead fit in the frame, and hold the ball in both hands for a beat before each shot.</p>'
     : s.topFix
       ? `<span class="label">Work on this next</span><h2>${s.topFix.area}</h2><p class="lede">${s.topFix.cue} It came up on ${s.topFix.fix} of ${s.graded} shots.</p>`
       : '<span class="label">Work on this next</span><h2>Nothing flagged</h2><p class="lede">Every check passed. Move back a few feet or try another camera angle.</p>';

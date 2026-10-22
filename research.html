@@ -15,8 +15,8 @@ th,td{text-align:left;vertical-align:top;padding:9px 10px;border-top:1px solid v
 th{font:500 11px/1.3 "SF Mono",ui-monospace,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);border-top:0;background:var(--panel)}
 .back{font:12px "SF Mono",ui-monospace,Menlo,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);text-decoration:none}
 </style></head><body><main><a class="back" href="./">← Back to the coach</a>
-<h1>Live Shot Coach: what it grades and why</h1>
-<p>This is the research behind the Live Shot Coach demo, written so it can be ported into CourtVision later. It covers every check the app runs, the camera angles each one works from, the target numbers, and where those numbers come from.</p>
+<h1>LiveShooting: what it grades and why</h1>
+<p>This is the research behind the LiveShooting demo, written so it can be ported into CourtVision later. It covers every check the app runs, the camera angles each one works from, the target numbers, and where those numbers come from.</p>
 <p><strong>How to read the "Basis" column</strong>
 - <strong>Research</strong>: the number comes from a published study.
 - <strong>Coaching</strong>: the cue comes from established coaching material; the cut-off number is ours.
@@ -198,7 +198,7 @@ th{font:500 11px/1.3 "SF Mono",ui-monospace,Menlo,monospace;letter-spacing:.08em
 </table></div>
 <h2>How a shot is detected</h2>
 <ol>
-<li>Both wrists drop below the shoulders (ball at the waist or pocket). The app is now armed.</li>
+<li>The app is armed when the ball is in both hands. The camera can't see the ball, so it looks for the posture: both wrists close together (within about 0.75 torso lengths), off the hips, no higher than the ears, and still for 0.25 s. This works at any height, so no waist reset is needed. Hands hanging at the sides, or both arms up overhead, don't count. (Dropping both wrists below the shoulders still arms it, as before.) Starting-point numbers, to be tuned.</li>
 <li>One wrist rises above the ears with the elbow nearly straight, within 1.6 s of being low. That's a shot. That arm is the shooting arm.</li>
 <li>The app keeps recording for 1.25 s to see the follow-through and landing, then grades the shot.</li>
 <li><strong>Set point</strong> is the moment the shooting forearm starts straightening fast (over 150°/s). That's where the ball launched from.</li>
@@ -211,7 +211,7 @@ th{font:500 11px/1.3 "SF Mono",ui-monospace,Menlo,monospace;letter-spacing:.08em
 <li><strong>Point at the target when possible.</strong> Lines like "Point it at the rim," "Reach for the top of the square" and "Reach into the cookie jar" aim attention at the rim, the ball, or an image. In Gabriele Wulf's experiments, an external focus like this beat body-part instructions, and the advantage held after the cues were removed (Wulf et al. 1998). Some cues still name a body part when that's the clearest way to say it ("Elbow in").</li>
 <li><strong>Short and spoken.</strong> Each fix is under about 10 words, with contractions and two-beat rhythm ("Hold that finish. Don't drop it."). There's a short breath between the praise and the fix, and a longer one before a repeat warning.</li>
 <li><strong>Variety.</strong> Most cues have two or more phrasings, and the coach rotates them so back-to-back reps don't sound like a loop. Hype calls never repeat within five shots.</li>
-<li><strong>Hype on clean reps.</strong> When every check passes, the coach fires a hype call ("Ice in your veins!", "You've got that dog in you!"). At 3, 5 and 8 clean reps in a row it calls the streak. Hype is based on form only, because the camera can't see makes. It can be turned off.</li>
+<li><strong>Hype on clean reps (switched off for now, until the voice is right).</strong> When every check passes, the coach fires a hype call ("Ice in your veins!", "You've got that dog in you!"). At 3, 5 and 8 clean reps in a row it calls the streak. Hype is based on form only, because the camera can't see makes. The code is still there; the app currently runs with it off.</li>
 <li><strong>Same fix three times running:</strong> the coach tells the player to slow down and shoot close to the rim, the foundations-first order from Ben's notes.</li>
 <li><strong>Ranking:</strong> fixes are ranked foundation-first, in this order: balance and base, set point, elbow and shot line, rhythm, guide hand, legs, release, follow-through.</li>
 <li><strong>Words:</strong> they follow Ben's kid-readable rule: short sentences, no coach jargon.</li>

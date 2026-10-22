@@ -1,6 +1,6 @@
 # LiveShooting
 
-AI live shooting feedback: the Live Shot Coach demo for CourtVision.
+AI live shooting feedback: the live shooting coach demo for CourtVision.
 
 **Live app:** https://dillondbutler25.github.io/LiveShooting/
 
@@ -16,7 +16,7 @@ Open the GitHub Pages link in **Safari** on an iPhone. The camera only works ove
 1. Pick where the phone is: in front, behind, right side or left side.
 2. Prop it about waist high, 10–15 feet away, in portrait, with your whole body and arms overhead in frame.
 3. Turn the ringer on and the volume up, then tap **Start live coaching**.
-4. Bring the ball to your waist between shots. That's how the coach knows a new shot is coming.
+4. Before each shot, hold the ball in both hands for a beat, wherever your set point is. That's how the coach knows a shot is coming.
 
 You can also grade a saved video with **Grade a saved video instead**.
 
@@ -29,6 +29,6 @@ You can also grade a saved video with **Grade a saved video instead**.
 | `lines.js` | Every line the coach can say, including hype calls |
 | `audio/` | Studio voice clips, one folder per voice. Re-record with `python3 tools/render_voices.py` |
 | `RESEARCH.md` / `research.html` | What each check measures, from which angles, and the studies behind it. Rebuild the HTML with `python3 tools/build_research.py` |
-| `tests/` | `node tests/run.mjs` runs 39 checks: simulated shots (good form plus specific flaws from every angle), voice-line coverage, and the hype rules (good form plus specific flaws from every angle) through the engine |
+| `tests/` | `node tests/run.mjs` runs 43 checks: simulated shots (good form plus specific flaws from every angle), voice-line coverage, and the hype rules (good form plus specific flaws from every angle) through the engine |
 | `vendor/mediapipe/` | MediaPipe Tasks Vision 0.10.14 runtime (Apache 2.0) |
-| `models/` | Pose landmarker models: `full` (accurate) and `lite` (fast) |
+| `models/` | Pose landmarker models. The app always uses `full` (accurate); `lite` is kept but unused |

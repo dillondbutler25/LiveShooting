@@ -42,6 +42,13 @@ for (const v of ['right', 'front']) run('set shot, two-motion', { jump: 0, tDip:
 for (const v of ['right']) run('no wrist snap', { snap: false }, v, { fix: ['snap'] });
 run('feet out of frame', { legsVisible: false }, 'front', { notFix: ['knees', 'drift', 'base'] });
 
+// Ball already at the chest or face (never dropped to the waist): the "ball in both
+// hands" posture should arm the detector without a waist reset.
+for (const v of ['front', 'right']) {
+  run('ball held at chest, no waist reset', { pocketW: { x: -0.06, y: 0.0, z: 0.3 }, pocketE: { x: 0.02, y: -0.12, z: 0.12 } }, v, { clean: true });
+  run('ball held at forehead, no reset', { pocketW: { x: -0.06, y: 0.12, z: 0.22 }, pocketE: { x: 0.02, y: -0.05, z: 0.1 } }, v, { clean: true });
+}
+
 // Two shots back to back -> two detections.
 {
   const a = makeShot({ view: 'front', tail: 1.8 }, 0);

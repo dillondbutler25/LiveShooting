@@ -58,6 +58,11 @@ export const T = {
   sideDriftOk: 0.18, sideDriftFix: 0.3, backFix: -0.08, fwdFix: 0.65,
   leanBackFix: 15,
   jumpMin: 0.05, // metres of hip rise that counts as a jump shot
+  // Ball in both hands (arms the shot detector). demo: starting values, tune after testing.
+  // Wrists within holdTogether torso-lengths of each other, at least holdOffHip of a torso
+  // above the hips, no higher than holdMaxAbove head-units over the ears, and moving less
+  // than holdStill torso-lengths for holdTime seconds.
+  holdTogether: 0.75, holdOffHip: 0.1, holdMaxAbove: 0.25, holdStill: 0.2, holdTime: 0.25,
 };
 
 // ---------- geometry ----------
@@ -137,9 +142,30 @@ export class ShotDetector {
     this.state = 'arming';
     this.pending = null;
     this.lastLowT = -1e9;
+    this.hold = null; // { t, rel } start of the current "ball in both hands" pause
     this.onShot = opts.onShot || (() => {});
   }
-  reset() { this.frames = []; this.state = 'arming'; this.pending = null; this.lastLowT = -1e9; }
+  reset() { this.frames = []; this.state = 'arming'; this.pending = null; this.lastLowT = -1e9; this.hold = null; }
+  // "Ball in both hands": the camera can't see the ball, but a ball held with two hands
+  // shows up as both wrists close together, off the hips, and still for a moment.
+  // This works at any height, so a player whose set point is at the chest or face
+  // doesn't have to drop the ball to the waist first.
+  holding(f) {
+    const sh = shMid(f), hp = hipMid(f);
+    const lw = f.p[L.lWr], rw = f.p[L.rWr];
+    if (!ok(lw, 0.5) || !ok(rw, 0.5)) { this.hold = null; return false; }
+    // Torso length is the yardstick: shoulder width collapses to nothing in side views.
+    const torso = Math.max(1, hp.y - sh.y);
+    const H = Math.max(1, sh.y - earY(f));
+    const offHips = (w) => w.y < hp.y - T.holdOffHip * torso;
+    const underHead = (w) => w.y > earY(f) - T.holdMaxAbove * H; // hands overhead is not "holding the ball"
+    const together = dist(lw, rw) / torso < T.holdTogether;
+    if (!offHips(lw) || !offHips(rw) || !underHead(lw) || !underHead(rw) || !together) { this.hold = null; return false; }
+    // Hand position relative to the shoulders, so swaying doesn't count as moving.
+    const rel = [lw, rw].map((w) => ({ x: (w.x - sh.x) / torso, y: (w.y - sh.y) / torso }));
+    if (!this.hold || rel.some((r, i) => Math.hypot(r.x - this.hold.rel[i].x, r.y - this.hold.rel[i].y) > T.holdStill)) this.hold = { t: f.t, rel };
+    return f.t - this.hold.t >= T.holdTime;
+  }
   push(f) {
     // f = { t, p: [33 {x,y,v}] image px, w: [33 {x,y,z}] metres or null }
     const last = this.frames[this.frames.length - 1];
@@ -147,7 +173,8 @@ export class ShotDetector {
     this.frames.push(f);
     while (this.frames.length && f.t - this.frames[0].t > this.keep) this.frames.shift();
     const sh = shMid(f);
-    const bothLow = ['L', 'R'].every((s) => f.p[ARM[s].wr].y > sh.y);
+    // Armed = hands down at the waist (the old reset) OR the ball held in both hands anywhere.
+    const bothLow = ['L', 'R'].every((s) => f.p[ARM[s].wr].y > sh.y) | this.holding(f);
     if (bothLow) this.lastLowT = f.t;
 
     if (this.state === 'arming') {
