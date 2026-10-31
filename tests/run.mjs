@@ -40,6 +40,8 @@ for (const v of ['right', 'front']) run('arm not straight at release', { relBend
 for (const v of ['right', 'front']) run('late release (way down)', { tDip: -0.75, tLegs: -0.42 }, v, { fix: ['timing'] });
 for (const v of ['right', 'front']) run('set shot, two-motion', { jump: 0, tDip: -0.8, tLegs: -0.5 }, v, { fix: ['timing'] });
 for (const v of ['right']) run('no wrist snap', { snap: false }, v, { fix: ['snap'] });
+for (const v of ['front', 'back']) run('feet turned 45 deg', { footTurn: 45 }, v, { fix: ['square'] });
+for (const v of ['front', 'back']) run('feet turned 10 deg (allowed)', { footTurn: 10 }, v, { notFix: ['square'] });
 run('feet out of frame', { legsVisible: false }, 'front', { notFix: ['knees', 'drift', 'base'] });
 
 // Ball already at the chest or face (never dropped to the waist): the "ball in both

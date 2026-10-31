@@ -9,6 +9,7 @@ import { LINES, variants } from './lines.js';
 export const L = {
   nose: 0, lEar: 7, rEar: 8, lSh: 11, rSh: 12, lEl: 13, rEl: 14, lWr: 15, rWr: 16,
   lIdx: 19, rIdx: 20, lHip: 23, rHip: 24, lKn: 25, rKn: 26, lAn: 27, rAn: 28,
+  lHeel: 29, rHeel: 30, lToe: 31, rToe: 32,
 };
 const ARM = {
   L: { sh: L.lSh, el: L.lEl, wr: L.lWr, idx: L.lIdx },
@@ -52,6 +53,12 @@ export const T = {
   guideOk: 0.3, guideFix: 0.45, guideFwdFix: 0.6,
   // Feet width = ankle gap / shoulder gap. src: Wissel, Breakthrough (shoulder width). demo range.
   baseNarrowFix: 0.55, baseGood: [0.75, 1.5], baseWideFix: 1.9,
+  // Feet squared to the rim (front/back), degrees the toes are turned off the rim line.
+  // src: Wissel, Basketball: Steps to Success (toes pointed straight at the basket);
+  // Coach's Clipboard (some shooters turn the ball side "a little" toward the hoop), so a
+  // small turn is allowed. demo: cut-offs, kept wide because pose angles carry ~10 deg error.
+  // Foot length ~0.152 x height, shank ~0.246 x height (Winter), so foot = 0.618 x shin.
+  squareOk: 20, squareFix: 30, footPerShin: 0.618,
   // Drift from takeoff to landing, metres. src: Breakthrough ("land a few inches in
   // front"); Podmenik 2021 (elite 21–49 cm forward on jumpers, sideways drift grows
   // with distance). demo: cut-offs.
@@ -372,6 +379,28 @@ export function analyzeShot(shot, cfg) {
     m.base = dist(fd.p[L.lAn], fd.p[L.rAn]) / (2 * halfSW);
   }
 
+  // Feet squared to the rim (front/back), in the moments before the dip. Seen from in
+  // front or behind, a foot pointing at the rim shows its heel and toe stacked; a turned
+  // foot shows its toe off to the side by foot-length x sin(turn). Foot length comes from
+  // the shin at its longest (standing), so knee bend doesn't shrink the ruler.
+  if (side === 'frontal' && legsVisible) {
+    const a = Number.isFinite(tDip) ? tDip : tRel - 0.4;
+    const shin = {};
+    for (const [kn, an] of [[L.lKn, L.lAn], [L.rKn, L.rAn]]) {
+      const ds = range(a - 1.2, a + 0.05).filter((f) => ok(f.p[kn]) && ok(f.p[an], 0.35)).map((f) => dist(f.p[kn], f.p[an]));
+      if (ds.length) shin[an] = Math.max(...ds);
+    }
+    const turns = [];
+    for (const f of range(a - 0.35, a + 0.05)) {
+      for (const [an, he, to] of [[L.lAn, L.lHeel, L.lToe], [L.rAn, L.rHeel, L.rToe]]) {
+        if (!shin[an] || !ok(f.p[he], 0.3) || !ok(f.p[to], 0.3)) continue;
+        const foot = shin[an] * T.footPerShin;
+        turns.push((Math.asin(Math.min(1, Math.abs(f.p[to].x - f.p[he].x) / foot)) * 180) / Math.PI);
+      }
+    }
+    if (turns.length >= 4) m.footTurn = median(turns);
+  }
+
   // Drift takeoff -> landing, metres in image plane.
   if (legsVisible) {
     const f0 = Number.isFinite(tDip) ? at(tDip) : at(tRel - 0.4);
@@ -407,6 +436,12 @@ function gradeChecks(m, c) {
     if (b < T.baseNarrowFix) add('base', 'Base', 1, 'fix', 0.6, d, 'fix.base.narrow', 'praise.base');
     else if (b > T.baseWideFix) add('base', 'Base', 1, 'fix', 0.5, d, 'fix.base.wide', 'praise.base');
     else add('base', 'Base', 1, b >= T.baseGood[0] && b <= T.baseGood[1] ? 'good' : 'ok', 0.2, d, 'fix.base.ok', 'praise.base');
+  }
+  if (fin(m.footTurn)) {
+    const t = m.footTurn;
+    const st = t > T.squareFix ? 'fix' : t > T.squareOk ? 'ok' : 'good';
+    const d = st === 'good' ? 'Feet pointed at the rim' : `Feet turned about ${Math.round(t)}° off the rim`;
+    add('square', 'Feet', 0.8, st, Math.max(0, Math.min(1, (t - T.squareOk) / 30)), d, 'fix.square', 'praise.base');
   }
   if (fin(m.driftSide)) {
     const d = Math.abs(m.driftSide);
@@ -548,8 +583,10 @@ export class Voice {
     const fixes = checks.filter((c) => c.status === 'fix').sort((a, b) => rank(b) - rank(a));
     const oks = checks.filter((c) => c.status === 'ok').sort((a, b) => b.weight - a.weight);
     const goods = checks.filter((c) => c.status === 'good').sort((a, b) => b.weight - a.weight);
-    const praise = goods.find((g) => g.pkey !== this.lastPraise) || goods[0];
     const top = fixes[0] || oks[0] || null;
+    // Never praise the same thing the fix is about ("feet were set... square your feet").
+    const praisable = goods.filter((g) => !top || g.pkey !== top.pkey);
+    const praise = praisable.find((g) => g.pkey !== this.lastPraise) || praisable[0];
     const ids = [];
     if (!top) {
       this.cleanStreak++;

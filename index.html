@@ -220,7 +220,7 @@ td.n{font-variant-numeric:tabular-nums;text-align:right;width:3.2em}
         <li><b>Rhythm:</b> release around the top of the jump. Satern 1993; Podmenik 2021 found elite shooters release 0–0.12 s after the peak on short and mid shots.</li>
         <li><b>Guide hand:</b> stays on the side of the ball and adds no push. Breakthrough Basketball; Wissel.</li>
         <li><b>Follow-through:</b> hold it until the ball reaches the rim, wrist snapped, fingers to the rim. Wissel; jr.nba.com.</li>
-        <li><b>Balance:</b> feet about shoulder width, land close to where you took off. Wissel; Breakthrough Basketball.</li>
+        <li><b>Balance:</b> feet about shoulder width and pointed at the rim, land close to where you took off. Wissel; Breakthrough Basketball.</li>
       </ul>
       <p>Full source list in <a href="research.html">the research page</a>. The camera can't see the ball, so arc, spin and makes aren't graded yet.</p>
     </details>
@@ -257,7 +257,7 @@ const save = () => { try { localStorage.setItem('liveshooting-settings', JSON.st
 
 const VIEW_NAMES = { front: 'In front', back: 'Behind', right: 'Right side', left: 'Left side' };
 const VIEW_CHECKS = {
-  frontal: 'Grades from here: <b>feet width, side-to-side balance, set point height and position, elbow alignment, shot line, guide hand, knee bend, rhythm, arm extension, follow-through hold</b>.',
+  frontal: 'Grades from here: <b>feet width, feet pointed at the rim, side-to-side balance, set point height and position, elbow alignment, shot line, guide hand, knee bend, rhythm, arm extension, follow-through hold</b>.',
   side: 'Grades from here: <b>knee bend, set point height, ball behind the head, rhythm and jump timing, arm extension, release angle, follow-through hold, wrist snap, fading back or leaning</b>.',
 };
 
@@ -535,7 +535,7 @@ function framingStatus(p, H) {
 }
 
 const BONES = [[11, 12], [11, 13], [13, 15], [12, 14], [14, 16], [11, 23], [12, 24], [23, 24], [23, 25], [25, 27], [24, 26], [26, 28], [27, 31], [28, 32], [15, 19], [16, 20]];
-const AREA_JOINTS = { Legs: [23, 24, 25, 26, 27, 28], 'Set height': [13, 14, 15, 16], 'Ball in front': [13, 14, 15, 16], 'Shooting pocket': [13, 14, 15, 16], Landing: [11, 12, 23, 24], Elbow: [13, 14], 'Shot line': [14, 16, 13, 15], Release: [13, 14, 15, 16], 'Follow-through': [15, 16, 19, 20], 'Guide hand': [13, 15, 14, 16], Rhythm: [25, 26, 13, 14], Balance: [23, 24, 27, 28, 11, 12], Base: [27, 28] };
+const AREA_JOINTS = { Legs: [23, 24, 25, 26, 27, 28], 'Set height': [13, 14, 15, 16], 'Ball in front': [13, 14, 15, 16], 'Shooting pocket': [13, 14, 15, 16], Landing: [11, 12, 23, 24], Elbow: [13, 14], 'Shot line': [14, 16, 13, 15], Release: [13, 14, 15, 16], 'Follow-through': [15, 16, 19, 20], 'Guide hand': [13, 15, 14, 16], Rhythm: [25, 26, 13, 14], Balance: [23, 24, 27, 28, 11, 12], Base: [27, 28], Feet: [27, 28, 29, 30, 31, 32] };
 function draw(p, W, H) {
   const lw = Math.max(3, W / 220);
   const hot = performance.now() < flashUntil ? new Set(AREA_JOINTS[flashArea] || []) : new Set();

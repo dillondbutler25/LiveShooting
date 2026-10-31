@@ -1,15 +1,15 @@
 {
 "clean.1": {
 "dur": 0.86,
-"h": "7892e3a90c"
+"h": "d542bd8d4e"
 },
 "clean.2": {
 "dur": 1.13,
 "h": "6ec4d3cc4d"
 },
 "fix.arc.1": {
-"dur": 2.86,
-"h": "ebf435e9f7"
+"dur": 2.88,
+"h": "5a28310f7a"
 },
 "fix.arc.2": {
 "dur": 2.28,
@@ -83,6 +83,10 @@
 "dur": 3.1,
 "h": "98199bff3f"
 },
+"fix.guide.3": {
+"dur": 1.37,
+"h": "17b19584aa"
+},
 "fix.hold.1": {
 "dur": 2.64,
 "h": "a4535a9293"
@@ -96,8 +100,8 @@
 "h": "edb5bec4a7"
 },
 "fix.knees.ok.1": {
-"dur": 1.61,
-"h": "b6cf1006ac"
+"dur": 1.22,
+"h": "b77578937c"
 },
 "fix.knees.shallow.1": {
 "dur": 2.57,
@@ -179,13 +183,13 @@
 "dur": 2.38,
 "h": "26b9b44061"
 },
+"fix.square.1": {
+"dur": 1.92,
+"h": "7e30e73332"
+},
 "fix.timing.gap.1": {
 "dur": 2.86,
 "h": "74dc59096a"
-},
-"fix.timing.gap.2": {
-"dur": 3.02,
-"h": "f43d588997"
 },
 "fix.timing.late.1": {
 "dur": 2.86,
@@ -267,10 +271,6 @@
 "dur": 1.56,
 "h": "a423e2818b"
 },
-"praise.drift.2": {
-"dur": 1.7,
-"h": "15ead994f1"
-},
 "praise.elbow.1": {
 "dur": 1.85,
 "h": "9a932b5fbf"
@@ -288,8 +288,8 @@
 "h": "9bd4810de8"
 },
 "praise.hold.1": {
-"dur": 1.03,
-"h": "8ed71a29e0"
+"dur": 1.34,
+"h": "ffa0ef9744"
 },
 "praise.hold.2": {
 "dur": 1.39,
@@ -332,8 +332,8 @@
 "h": "8d70bb18ae"
 },
 "praise.timing.2": {
-"dur": 1.92,
-"h": "21ee27e7be"
+"dur": 1.3,
+"h": "2e2713260e"
 },
 "streak.3": {
 "dur": 1.94,
@@ -356,8 +356,8 @@
 "h": "62886011b0"
 },
 "sys.repeat": {
-"dur": 3.91,
-"h": "b16a7683a0"
+"dur": 5.64,
+"h": "cdfaddf155"
 },
 "sys.session": {
 "dur": 1.75,

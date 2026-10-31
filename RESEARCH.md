@@ -13,7 +13,7 @@ The app tracks 33 body points (MediaPipe Pose) on every frame. It sees joints, n
 
 | Camera spot | Sees well | Can't judge well |
 |---|---|---|
-| In front / behind | Elbow alignment, ball position side to side, shot line, guide hand, feet width, drifting sideways, set point height | Ball behind the head, release angle, fading back |
+| In front / behind | Elbow alignment, ball position side to side, shot line, guide hand, feet width, feet pointed at the rim, drifting sideways, set point height | Ball behind the head, release angle, fading back |
 | Right / left side | Knee bend, set point height, ball behind the head, release angle, wrist snap, fading back, leaning | Elbow flare, shot line, drifting sideways |
 
 Side view from the shooting-hand side is the most reliable for arm readings (right side for righties). From the other side the shooting arm is partly hidden behind the body.
@@ -36,6 +36,7 @@ Side view from the shooting-hand side is the most reliable for arm readings (rig
 | Follow-through hold | All | Seconds the arm stays up and straight after release | 0.7 s or more | Under 0.5 s | Coaching: hold it until the ball hits the rim (Breakthrough, Wissel). Starting point |
 | Wrist snap | Side | Fingers below the wrist after release | Snapped | Hand stays stiff | Coaching: jr.nba.com ("snapping your wrist in a downward waving motion"), Wissel |
 | Base | Front/back | Ankle gap vs shoulder gap at the dip | 0.75–1.5× | Under 0.55× or over 1.9× | Coaching: feet about shoulder width (Wissel, Breakthrough). Starting point |
+| Feet squared | Front/back | How far the toes are turned off the rim line before the dip: toe's sideways offset from the heel vs foot length (foot = 0.618 × shin, from Winter's segment proportions) | 20° or less | Over 30° | Coaching: point your toes straight at the basket (Wissel, *Basketball: Steps to Success*); some shooters turn the ball side a little toward the hoop (Coach's Clipboard), so a small turn is allowed. Cut-offs are a starting point, kept wide because single-camera pose angles carry about 10° of error |
 | Balance (sideways) | Front/back | Hip movement from takeoff to landing | Under 18 cm | Over 30 cm | Coaching: land where you took off (Breakthrough). Research: elite shooters drift more on long shots (Podmenik 2021), so this is loose on purpose |
 | Balance (fade) | Side | Hip movement forward or back | Up to 65 cm forward | Fading back more than 8 cm, or flying forward over 65 cm | Coaching: "land a few inches in front" (Breakthrough). Research: elite shooters move 21–49 cm forward on jumpers (Podmenik 2021) |
 | Landing | Side | Trunk lean at landing | Upright | Leaning back over 15° | Coaching: "head over your feet" (Wissel). Starting point |
@@ -57,7 +58,8 @@ The coach's lines are written and delivered the way good coaches cue, not the wa
 - **Short and spoken.** Each fix is under about 10 words, with contractions and two-beat rhythm ("Hold that finish. Don't drop it."). There's a short breath between the praise and the fix, and a longer one before a repeat warning.
 - **Variety.** Most cues have two or more phrasings, and the coach rotates them so back-to-back reps don't sound like a loop. Hype calls never repeat within five shots.
 - **Hype on clean reps (switched off for now, until the voice is right).** When every check passes, the coach fires a hype call ("Ice in your veins!", "You've got that dog in you!"). At 3, 5 and 8 clean reps in a row it calls the streak. Hype is based on form only, because the camera can't see makes. The code is still there; the app currently runs with it off.
-- **Same fix three times running:** the coach tells the player to slow down and shoot close to the rim, the foundations-first order from Ben's notes.
+- **Same fix three times running:** the coach tells the player to slow down and focus on correcting their form.
+- **Praise never contradicts the fix.** The praise line is never about the same body part as the fix that follows it.
 - **Ranking:** fixes are ranked foundation-first, in this order: balance and base, set point, elbow and shot line, rhythm, guide hand, legs, release, follow-through.
 - **Words:** they follow Ben's kid-readable rule: short sentences, no coach jargon.
 
@@ -86,6 +88,9 @@ The coach's lines are written and delivered the way good coaches cue, not the wa
 - Relationship between kinematic characteristics and free-throw shooting precision: markerless motion capture analysis (2023). ISBS Proceedings Archive 41(1). https://lida.sport-iat.de/dbb/Record/4083642?lng=en
 - Stojanović E. et al. (2019). Kinematic parameters of jump shot in elite male basketball players. *Facta Universitatis: Physical Education and Sport*, 17(2). https://casopisi.junis.ni.ac.rs/index.php/FUPhysEdSport/article/view/3908
 - Wissel H. Shooting mechanics (via Coach's Clipboard). https://www.coachesclipboard.net/WisselShootingMechanics.html
+- Wissel H. *Basketball: Steps to Success*, 3rd ed. (Human Kinetics). Excerpt, "Develop your shot with shooting mechanics". https://us.humankinetics.com/blogs/excerpt/develop-your-shot-with-shooting-mechanics
+- Coach's Clipboard. Shooting (stance). https://www.coachesclipboard.net/Shooting.html
+- Winter D.A. *Biomechanics and Motor Control of Human Movement* (segment lengths as a fraction of height).
 - Breakthrough Basketball. How to shoot a basketball: proper shooting form. https://www.breakthroughbasketball.com/fundamentals/shooting-technique
 - Jr. NBA. How to shoot a basketball. https://jr.nba.com/shooting/
 - Grantland. The Shot Doctor (Chip Engelland). https://grantland.com/features/the-shot-doctor/
