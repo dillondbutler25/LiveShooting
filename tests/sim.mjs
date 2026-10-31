@@ -6,7 +6,7 @@ const DEF = {
   view: 'front', fps: 30, kneeMin: 112, tDip: -0.42, tLegs: -0.1, jump: 0.12,
   setWrist: { y: 0.25, z: 0.2, x: -0.08 }, setElbow: { y: 0.0, z: 0.28, x: -0.05 },
   relElev: 70, relOut: -0.03, relBend: 0, hold: 0.9, guidePush: 0, guideFwd: 0, drift: { x: 0, z: 0.08 },
-  snap: true, pocketW: { x: -0.06, y: -0.15, z: 0.32 }, pocketE: { x: 0.02, y: -0.25, z: 0.1 }, stance: 0.36, footTurn: 0, noise: 1.2, lead: 2.6, tail: 1.6, legsVisible: true,
+  snap: true, pocketW: { x: -0.06, y: -0.15, z: 0.32 }, pocketE: { x: 0.02, y: -0.25, z: 0.1 }, stance: 0.36, footTurn: 0, footYaw: 0, noise: 1.2, lead: 2.6, tail: 1.6, legsVisible: true,
 };
 
 const lerp = (a, b, u) => a + (b - a) * u;
@@ -45,12 +45,13 @@ export function makeShot(over = {}, t0 = 0) {
     set(L.nose, 0, earY - 0.01, 0.1);
     for (let i = 1; i <= 10; i++) if (!P[i]) set(i, 0, earY, 0.05);
     // feet: heel just behind the ankle, toe ahead (toward the rim), foot = 0.618 x shin (0.45 m).
-    // footTurn = degrees both feet are turned outward off the rim line.
-    const footL = 0.618 * 0.45, ft = (o.footTurn * Math.PI) / 180;
-    for (const [an, he, to, sgn] of [[L.lAn, 29, 31, -1], [L.rAn, 30, 32, 1]]) {
-      const hx = sgn * o.stance / 2;
+    // footTurn = degrees both feet are turned outward off the rim line (splayed).
+    // footYaw = degrees both feet are rotated the same way (+ = toward the shooter's right).
+    const footL = 0.618 * 0.45;
+    for (const [he, to, sgn] of [[29, 31, -1], [30, 32, 1]]) {
+      const hx = sgn * o.stance / 2, ang = ((sgn * o.footTurn + o.footYaw) * Math.PI) / 180;
       set(he, hx, ankleY, -0.05);
-      set(to, hx + sgn * footL * Math.sin(ft), ankleY, -0.05 + footL * Math.cos(ft));
+      set(to, hx + footL * Math.sin(ang), ankleY, -0.05 + footL * Math.cos(ang));
     }
 
     // shooting arm (right), keyframes relative to shoulder

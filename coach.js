@@ -59,6 +59,8 @@ export const T = {
   // small turn is allowed. demo: cut-offs, kept wide because pose angles carry ~10 deg error.
   // Foot length ~0.152 x height, shank ~0.246 x height (Winter), so foot = 0.618 x shin.
   squareOk: 20, squareFix: 30, footPerShin: 0.618,
+  // Feet count as planted below this ankle speed, torso-lengths per second. demo.
+  plantedSpeed: 1.2,
   // Drift from takeoff to landing, metres. src: Breakthrough ("land a few inches in
   // front"); Podmenik 2021 (elite 21–49 cm forward on jumpers, sideways drift grows
   // with distance). demo: cut-offs.
@@ -379,26 +381,37 @@ export function analyzeShot(shot, cfg) {
     m.base = dist(fd.p[L.lAn], fd.p[L.rAn]) / (2 * halfSW);
   }
 
-  // Feet squared to the rim (front/back), in the moments before the dip. Seen from in
+  // Feet squared to the rim (front/back), in the push just before release (on a pull-up
+  // the deepest knee bend can come mid-dribble, so the dip is the wrong moment). Seen from in
   // front or behind, a foot pointing at the rim shows its heel and toe stacked; a turned
   // foot shows its toe off to the side by foot-length x sin(turn). Foot length comes from
   // the shin at its longest (standing), so knee bend doesn't shrink the ruler.
+  // Only frames with both feet planted count (a pull-up's dip can land mid-stride), and it
+  // takes 3+ of them to grade. If the camera sits off to an angle, cfg.rimBearing (degrees,
+  // + = the rim is to the camera's right of straight-ahead, from the shooter) says which way
+  // "at the rim" points, so a shooter facing the rim isn't flagged for the camera's angle.
   if (side === 'frontal' && legsVisible) {
-    const a = Number.isFinite(tDip) ? tDip : tRel - 0.4;
+    const bearing = view === 'back' && Number.isFinite(cfg.rimBearing) ? cfg.rimBearing : 0;
     const shin = {};
     for (const [kn, an] of [[L.lKn, L.lAn], [L.rKn, L.rAn]]) {
-      const ds = range(a - 1.2, a + 0.05).filter((f) => ok(f.p[kn]) && ok(f.p[an], 0.35)).map((f) => dist(f.p[kn], f.p[an]));
+      const ds = range(tRel - 1.6, tRel).filter((f) => ok(f.p[kn]) && ok(f.p[an], 0.35)).map((f) => dist(f.p[kn], f.p[an]));
       if (ds.length) shin[an] = Math.max(...ds);
     }
+    const win = range(tRel - 0.55, tRel - 0.12);
     const turns = [];
-    for (const f of range(a - 0.35, a + 0.05)) {
+    let planted = 0;
+    for (let i = 1; i < win.length; i++) {
+      const f = win[i], g = win[i - 1], dt = f.t - g.t;
+      const torso = Math.max(1, dist(shMid(f), hipMid(f)));
+      if (!(dt > 0) || dist(f.p[L.lAn], g.p[L.lAn]) / dt / torso > T.plantedSpeed || dist(f.p[L.rAn], g.p[L.rAn]) / dt / torso > T.plantedSpeed) continue;
+      planted++;
       for (const [an, he, to] of [[L.lAn, L.lHeel, L.lToe], [L.rAn, L.rHeel, L.rToe]]) {
         if (!shin[an] || !ok(f.p[he], 0.3) || !ok(f.p[to], 0.3)) continue;
-        const foot = shin[an] * T.footPerShin;
-        turns.push((Math.asin(Math.min(1, Math.abs(f.p[to].x - f.p[he].x) / foot)) * 180) / Math.PI);
+        const s = Math.max(-1, Math.min(1, (f.p[to].x - f.p[he].x) / (shin[an] * T.footPerShin)));
+        turns.push(Math.abs((Math.asin(s) * 180) / Math.PI - bearing));
       }
     }
-    if (turns.length >= 4) m.footTurn = median(turns);
+    if (planted >= 3 && turns.length >= 4) m.footTurn = median(turns);
   }
 
   // Drift takeoff -> landing, metres in image plane.

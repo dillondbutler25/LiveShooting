@@ -5,12 +5,12 @@ import { LINES, variants } from '../lines.js';
 import { readFileSync } from 'node:fs';
 
 let pass = 0, fail = 0;
-function run(name, over, view, expect) {
+function run(name, over, view, expect, cfg = {}) {
   const frames = makeShot({ ...over, view });
   const shots = [];
   const det = new ShotDetector({ onShot: (s) => shots.push(s) });
   for (const f of frames) det.push(f);
-  const res = shots.map((s) => analyzeShot(s, { view, hand: 'R' }));
+  const res = shots.map((s) => analyzeShot(s, { view, hand: 'R', ...cfg }));
   const fixes = res[0] && !res[0].error ? res[0].checks.filter((c) => c.status === 'fix').map((c) => c.id) : [];
   const okc = res[0] && !res[0].error ? res[0].checks.filter((c) => c.status === 'ok').map((c) => c.id) : [];
   let good = shots.length === (expect.shots ?? 1);
@@ -42,6 +42,10 @@ for (const v of ['right', 'front']) run('set shot, two-motion', { jump: 0, tDip:
 for (const v of ['right']) run('no wrist snap', { snap: false }, v, { fix: ['snap'] });
 for (const v of ['front', 'back']) run('feet turned 45 deg', { footTurn: 45 }, v, { fix: ['square'] });
 for (const v of ['front', 'back']) run('feet turned 10 deg (allowed)', { footTurn: 10 }, v, { notFix: ['square'] });
+// Camera behind but off to an angle: feet pointing at the rim look turned on camera.
+run('feet at rim, camera 40 deg off', { footYaw: 40 }, 'back', { notFix: ['square'] }, { rimBearing: 40 });
+run('same, rim angle unknown', { footYaw: 40 }, 'back', { fix: ['square'] });
+run('feet 40 deg off a straight-on rim', { footYaw: 40 }, 'back', { fix: ['square'] }, { rimBearing: 0 });
 run('feet out of frame', { legsVisible: false }, 'front', { notFix: ['knees', 'drift', 'base'] });
 
 // Ball already at the chest or face (never dropped to the waist): the "ball in both
